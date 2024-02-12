@@ -1,0 +1,50 @@
+version: '3.7'
+
+networks:
+  network:
+    driver: bridge
+
+services:
+  api:
+    container_name: core_api
+    build:
+      context: ./api
+      dockerfile: api.Dockerfile
+    restart: on-failure
+    volumes:
+      - ./api/app:/app
+    networks:
+      - network
+    entrypoint: ["sh", "-C", "/scripts/start.sh"]
+
+  app:
+    depends_on:
+      - api
+    container_name: core_app
+    build :
+      context: ./app
+      dockerfile: app.Dockerfile
+    restart: on-failure
+    volumes:
+      - ./app/app:/app
+    networks:
+      - network
+    entrypoint: ["sh", "-C", "/scripts/start.sh"]
+
+  nginx:
+    depends_on:
+      - api
+      - app
+    container_name: proxy
+    build:
+      context: ./proxy
+      dockerfile: proxy.Dockerfile
+    restart: on-failure
+    ports:
+      - 80:80
+      - 5111:5111
+    volumes:
+      - ./proxy/conf:/etc/nginx/conf.d
+    networks:
+      - network
+    entrypoint: ["nginx", "-g", "daemon off;"]
