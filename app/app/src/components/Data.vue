@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, Ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { person, status, gen, api } from '../common/iPerson'
 import Add from './Add.vue'
 import InitExam from './InitExam.vue'
+import Person from './Person.vue'
 import { wSocket } from '../composable/websocket'
 import { apiUseFetch } from '../composable/api'
 
@@ -86,7 +87,7 @@ async function endExam ()
 				<Add @reload="toChange++" :apiUseFetch="useFetch"/>
 			</v-col>
 			<v-col @click="endExam()" class="flex-center">
-				<v-btn :disabled="!started" prepend-icon="$vuetify">
+				<v-btn :disabled="!started" prepend-icon="mdi-meteor">
 					End Exam
 				</v-btn>
 			</v-col>
@@ -109,14 +110,15 @@ async function endExam ()
 </template>
   
 <template v-slot:default="{ items }">
-	<v-container :key="toChange" class="pa-2">
+	<v-container class="pa-2">
 		<v-row>
-			<v-col v-for="item in items" :key="item.raw.title">
-				<v-card class="pb-3" border flat>
+			<v-col v-for="item in items">
+				<Person :api="useFetch" :item="item.raw" :started="started"/>
+				<!-- <v-card class="pb-3" border flat>
 
 					<v-list-item class="mb-2">
 						<template v-slot:title>
-						<!-- <v-row class="flex-between"> -->
+						
 						<div class="flex-between">
 						  <strong class="text-h6 mb-2">id: {{ item.raw.id }}</strong>
 						  <strong class="text-h6 mb-2">{{ item.raw.status }}</strong>
@@ -124,7 +126,7 @@ async function endExam ()
 						  </div>
 						</template>
 
-						<!-- Timer and number of breaks left -->
+					
 					<div class="d-flex align-center text-caption text-medium-emphasis me-1">
 					  <v-icon icon="mdi-clock" start></v-icon>
 					  <div class="text-truncate">00:00</div>
@@ -133,42 +135,16 @@ async function endExam ()
 					  <v-icon icon="mdi-account-reactivate" start></v-icon>
 					  <div class="text-truncate">{{ item.raw.num }}</div>
 					</div>
-					<!-- End Timer and number of breaks left -->
+					
 				  </v-list-item>
   
 				  <div class="d-flex justify-space-between px-4">
 
-					<v-btn
-						@click="item.raw.status = status.away"
-						:disabled="!started || item.raw.status == status.away"
-					  border
-					  flat
-					  size="small"
-					  class="text-none"
-					  text="Away"
-					/>
+					
+					<StatusUpdate :api="useFetch" :entry="item.raw" :started="started"/>
 
-					<v-btn
-					@click="item.raw.status = status.emergency"
-					:disabled="!started || item.raw.status == status.emergency"
-					  border
-					  flat
-					  size="small"
-					  class="text-none"
-					  text="Emergency"
-					/>
-
-					<v-btn
-					@click="item.raw.status = status.seated"
-					:disabled="!started || item.raw.status == status.seated"
-					  border
-					  flat
-					  size="small"
-					  class="text-none"
-					  text="Seated"
-					/>
 				  </div>
-				</v-card>
+				</v-card> -->
 			  </v-col>
 			</v-row>
 		  </v-container>

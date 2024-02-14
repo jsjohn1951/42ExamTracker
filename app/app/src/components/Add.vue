@@ -25,9 +25,9 @@ async function submit()
 		id: pId.value,
 		username: pUsername.value,
 		status: status.seated,
-		gender: pGender.value
+		gender: pGender.value,
+		num: 0
 	}
-	console.log(nPerson);
 	await api.postUser(nPerson);
 	emit('reload', true);
 }

@@ -2,6 +2,7 @@ from typing import List
 from fastapi import FastAPI, HTTPException, WebSocket
 from models import User, Status, NumBreaks, Server, ServStart
 from wsManager import manager
+import time
 
 app = FastAPI()
 
@@ -10,19 +11,6 @@ app.db = []
 app.runtime = Server(examStart=ServStart.stopped)
 
 app.breaks = NumBreaks(perFacility=3,perPerson=3)
-
-async def updater(item : User, update : User) :
-	if item.status != update.status : 
-		if update.status == Status.away :
-			if item.num == 0 :
-				raise HTTPException(
-					status_code = 404,
-					detail=f"User '{update.user}' has no more breaks!"
-				);
-			item.num -= 1;
-		item.status = update.status;
-	if item.gender != update.gender : item.gender == update.gender;
-	return item
 
 @app.get("/api")
 def read_root():
@@ -39,6 +27,8 @@ async def isStart() :
 
 @app.post("/api/v1/start")
 async def postStart(run: Server) :
+	for item in app.db :
+		item.status = Status.seated;
 	app.runtime.examStart = run.examStart;
 
 # posts
@@ -53,6 +43,7 @@ async def reg_user(user: User) :
 		if ((item.id != 0 and item.id == user.id) or \
 		(item.user != '' and item.user == user.user)) :
 			return user;
+	user.num = app.breaks.perPerson;
 	app.db.append(user);
 	return user;
 
@@ -63,16 +54,32 @@ async def updateBreaks(recBreaks: NumBreaks) :
 		item.num = app.breaks.perPerson;
 	return app.breaks;
 
-
+def updateUser(item: User, update: User) :
+	stat: Status = item.status;
+	if (item.status != update.status) :
+		item.status = update.status;
+	if (item.status == Status.away) :
+		if (item.num > 0) :
+			item.num = item.num - 1;
+		else :
+			item.status = stat;
 
 # Updates
 @app.put("/api/v1/users")
 async def up_user(update: User) :
-	for item in app.db :
-		if (item.id == update.id or item.user == update.user) :
-			item = await updater(item, update)
-			return
-		raise HTTPException(
+	print('update: ', update);
+	print('data: ', app.db)
+	if (update.id != 0) :
+		for item in app.db :
+			if (item.id == update.id) :
+				updateUser(item, update);
+				return ;
+	elif (update.user != '') :
+		for item in app.db :
+			if (item.user == update.user) :
+				updateUser(item, update);
+				return ;
+	raise HTTPException(
 		status_code = 404,
 		detail=f"User '{update.user if update.user else update.id}' not found in Database!"
 	)
@@ -84,12 +91,27 @@ async def websocket_endpoint(websocket: WebSocket):
 	await manager.connect('all', websocket);
 	try:
 		while True:
-			await websocket.receive_text();
-			await manager.send_personal_message("Updating all",websocket);
-			await manager.broadcast('Update All', 'all', websocket);
+			res = await websocket.receive_text();
+			print('res: ', res);
+			await manager.send_personal_message(res,websocket);
+			await manager.broadcast(res, 'all', websocket);
 	except Exception as e:
 		print("Got an exception ",e);
 		await manager.disconnect('all', websocket);
+
+@app.websocket("/ws/time/{room_id}")
+async def websocket_endpoint(websocket: WebSocket, room_id: str):
+	await manager.connect(room_id, websocket);
+	try:
+		while True:
+			res = await websocket.receive_text();
+			income = res.split(' ')
+			print('res: ', income);
+			await manager.send_personal_message(res,websocket);
+			await manager.broadcast(res, room_id, websocket);
+	except Exception as e:
+		print("Got an exception ",e);
+		await manager.disconnect(room_id, websocket);
 
 
 

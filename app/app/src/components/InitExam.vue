@@ -46,7 +46,7 @@ async function startExam()
 	<v-row justify="center">
 		<v-dialog v-model="dialog" persistent width="1024">
 			<template v-slot:activator="{ props }">
-			<v-btn :disabled="started" v-bind="props" prepend-icon="$vuetify">
+			<v-btn :disabled="started" v-bind="props" prepend-icon="mdi-google-downasaur">
 					Start Exam
 				</v-btn>
 </template>

@@ -94,6 +94,35 @@ export class apiUseFetch {
     	});
 	}
 
+	async putUser (nPerson: person, num: Ref<number>)
+	{
+		const request = {
+			method: "PUT",
+    		headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				id: parseInt(nPerson.id ? nPerson.id : '0'),
+				user: nPerson.username,
+				gender: nPerson.gender,
+				status: nPerson.status,
+				num: nPerson.num
+			})
+		};
+
+		const res = await fetch ('/api/v1/users',request).then(async res => {
+			const data = await res.json();
+
+			if (!res.ok)
+			{
+				console.log('error received');
+				return Promise.reject(((data && data.message) || res.status));
+			}
+			this.ws.value.send(`PUTUSER ${request.body}`)
+		}
+		).catch(error => {
+    	  console.error('There was an error!', error);
+    	});
+	}
+
 	async putStart(start: boolean)
 	{
 		const request = {

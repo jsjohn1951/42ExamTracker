@@ -18,12 +18,12 @@ class ConnectionManager:
 
     async def send_personal_message(self, message: str, websocket: WebSocket):
         await websocket.send_text(message)
-        print("Sent a personal msg to , ",websocket)
+        # print("Sent a personal msg to , ",websocket)
 
     async def broadcast(self, message: str, room_id: str, websocket: WebSocket):
         for connection in self.active_connections[room_id]:
             if connection != websocket:
                 await connection.send_text(message)
-                print("In broadcast: sent msg to ",connection)
+                # print("In broadcast: sent msg to ",connection)
 
 manager = ConnectionManager()
