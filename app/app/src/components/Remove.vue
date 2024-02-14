@@ -15,7 +15,6 @@ const emit = defineEmits({
 
 const pId = ref('');
 const pUsername = ref('');
-const pGender = ref(gen.male);
 const expand = ref(false)
 const api = props.apiUseFetch;
 const err = ref(false);
@@ -27,14 +26,10 @@ async function submit()
 		err.value = true;
 		return;
 	}
-	let nPerson: person = {
-		id: pId.value,
-		username: pUsername.value,
-		status: status.seated,
-		gender: pGender.value,
-		num: 0
-	}
-	await api.postUser(nPerson);
+	if (pId.value.length != 0)
+		await api.deleteUserId(pId.value);
+	else if (pUsername.value.length != 0)
+		await api.deleteUserUsr(pUsername.value);
 
 	pId.value = '';
 	pUsername.value = '';
@@ -69,20 +64,8 @@ async function submit()
 		<v-expand-transition>
 			<p v-if="expand && err" class="text-overline font-weight-thin text-center" style="color: red;">Both Id and Username cannot be empty*</p>
 		</v-expand-transition>
-		<v-expand-transition>
 
-			<div v-if="expand" class="flex-start" style="width: 100%; height: fit-content; padding-left: 18px;">
-				<v-switch
-				v-if="expand"
-				@click="pGender != gen.female ? pGender = gen.female : pGender = gen.male"
-				:label="pGender">
-				</v-switch>
-			</div>
-
-		</v-expand-transition>
-
-
-      <v-btn @click="submit()" type="submit" block class="mt-2">Add Person</v-btn>
+      <v-btn @click="submit()" type="submit" block class="mt-2">Remove Person</v-btn>
     </v-form>
   </v-sheet>
 </template>

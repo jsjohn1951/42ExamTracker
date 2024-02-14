@@ -25,6 +25,12 @@ async def fetch_users() :
 async def isStart() :
 	return app.runtime.examStart;
 
+@app.get("/api/v1/users/away")
+async def allAway() :
+	listAll = [entry for entry in app.db if entry.status == Status.away];
+	print('----- all away ------: ', listAll);
+	return listAll;
+
 @app.post("/api/v1/start")
 async def postStart(run: Server) :
 	for item in app.db :
@@ -69,12 +75,13 @@ def updateUser(item: User, update: User) :
 async def up_user(update: User) :
 	print('update: ', update);
 	print('data: ', app.db)
-	if (update.id != 0) :
+	if (update.id != None and update.id != 0) :
+		print('update id: ', update.id)
 		for item in app.db :
 			if (item.id == update.id) :
 				updateUser(item, update);
 				return ;
-	elif (update.user != '') :
+	elif (update.user != None and update.user != '') :
 		for item in app.db :
 			if (item.user == update.user) :
 				updateUser(item, update);
@@ -121,12 +128,23 @@ async def clear() :
 	app.db.clear();
 	return ("cleared database")
 
-@app.delete("/api/v1/users/{name}")
-async def rm_user(name: str) :
+@app.delete("/api/v1/users/id/{id}")
+async def rm_user(id: str) :
+	usr_id = int(id);
 	for item in app.db :
-		if (item.f_name == name) :
-			return app.db.remove(item)
+		if (item.id == usr_id) :
+			return app.db.remove(item);
 	raise HTTPException(
 		status_code = 404,
-		detail=f"User '{name}' not found in Database!"
-	)
+		detail=f"User '{id}' not found in Database!"
+	);
+
+@app.delete("/api/v1/users/user/{id}")
+async def rm_user(id: str) :
+	for item in app.db :
+		if (item.user == id) :
+			return app.db.remove(item);
+	raise HTTPException(
+		status_code = 404,
+		detail=f"User '{id}' not found in Database!"
+	);

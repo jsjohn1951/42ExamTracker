@@ -4,7 +4,12 @@ import { wSocket } from './websocket';
 import { NumBreaks } from '@/common/iNumBreaks';
 
 export class apiUseFetch {
-	ws: Ref<wSocket>
+	ws: Ref<wSocket>;
+
+	constructor(ws: Ref<wSocket>)
+	{
+		this.ws = ws;
+	}
 
 	async users ()
 	{
@@ -148,8 +153,54 @@ export class apiUseFetch {
     	});
 	}
 
-	constructor(ws: Ref<wSocket>)
+	async deleteUserId(id: string)
 	{
-		this.ws = ws;
+		let data: any;
+
+		await fetch (`/api/v1/users/id/${id}`,
+		{
+			method: 'DELETE',
+		}).then(async(res) => {
+			await res.json().then((d) => {
+				data = d;
+			this.ws.value.send(`deleting user:${id}`)
+		})
+		}).catch((err) => {
+			console.log('error: ', err);
+		})
+	}
+
+	async deleteUserUsr(id: string)
+	{
+		let data: any;
+
+		await fetch (`/api/v1/users/user/${id}`,
+		{
+			method: 'DELETE',
+		}).then(async(res) => {
+			await res.json().then((d) => {
+				data = d;
+			this.ws.value.send(`deleting user:${id}`)
+		})
+		}).catch((err) => {
+			console.log('error: ', err);
+		})
+	}
+
+	async getUsersAway()
+	{
+		let data: any;
+
+		await fetch (`/api/v1/users/away`,
+		{
+			method: 'GET',
+		}).then(async(res) => {
+			await res.json().then((d) => {
+				data = d;
+		})
+		}).catch((err) => {
+			console.log('error: ', err);
+		})
+		return (data as api[]);
 	}
 }

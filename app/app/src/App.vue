@@ -4,10 +4,12 @@ import Data from '@/components/Data.vue'
 
 <template>
 	<v-theme-provider theme="dark">
-	<v-app>
-			<v-main>
-					<div class="app-container">
-						<Data/>
+	<v-app style="width: 100vw;">
+			<v-main style="width: 100vw;">
+					<div class="app-container flex-center">
+						<Suspense>
+							<Data/>
+						</Suspense>
 					</div>
 			</v-main>
 		</v-app>
@@ -15,10 +17,28 @@ import Data from '@/components/Data.vue'
 </template>
 
 <style>
+html, body, #app {
+	width: 100%;
+	overflow-x: hidden;
+	margin: 0;
+	padding: 0;
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar {
+    display: none;
+}
+
 .app-container {
 	height: fit-content;
 	min-height: 100vh;
 	width: 100vw;
+}
+
+#app {
+  margin: 0;
+  padding: 0;
 }
 
 .flex-center {
