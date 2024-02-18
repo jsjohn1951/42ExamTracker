@@ -3,25 +3,23 @@ import { apiUseFetch } from '../composable/api'
 import { person, status, api } from '../common/iPerson'
 import { wTimer } from '../composable/websocket'
 import { ref } from 'vue'
+import { onMounted } from 'vue';
 
 const props = defineProps < {
 	api: apiUseFetch,
-	timer: wTimer,
 	entry: person,
-	started: boolean
+	started: boolean,
+	away?: boolean
 } > ();
 
 const entry = ref(props.entry);
 const api = props.api;
-const timer = props.timer;
 const num = ref(0);
 
 async function update(stat: status)
 {
 	entry.value.status = stat;
 	await api.putUser(entry.value, num);
-	if (entry.value.status == status.away)
-		timer.send('ACK ' + JSON.stringify(entry.value));
 }
 </script>
 

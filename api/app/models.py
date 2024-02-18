@@ -21,6 +21,7 @@ class User(BaseModel) :
 	gender: Optional[Gender] = "Male"
 	status: Optional[Status] = "SEATED"
 	num: Optional[int] = 3
+	time: Optional[str] = None
 
 class NumBreaks(BaseModel) :
 	perFacility: int
@@ -28,3 +29,9 @@ class NumBreaks(BaseModel) :
 
 class Server(BaseModel) :
 	examStart: Optional[ServStart] = "NOT RUNNING"
+
+class HistoryEntry(BaseModel) :
+	id: Optional[int] = None
+	user: Optional[str] = ''
+	event: Optional[Status] = Status.seated
+	time: Optional[float] = 0.0

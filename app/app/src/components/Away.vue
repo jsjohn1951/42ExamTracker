@@ -22,7 +22,8 @@ for (item of all.value)
 		username: item.user ? item.user! : '',
 		status: item.status ? item.status! : status.seated,
 		gender: item.gender ? item.gender! : gen.male,
-		num: item.num ? item.num! : 0
+		num: item.num ? item.num! : 0,
+		time: item.time ? item.time! : undefined
 	}
 	if (item.gender == gen.male)
 		entryMale.value.push(entity);
@@ -32,7 +33,7 @@ for (item of all.value)
 </script>
 
 <template>
-	<v-card class="flex-center flex-col">
+	<v-card class="flex-center flex-col" style="padding: 0px 15px 0px 15px; max-width: 900px;">
 		<v-row>
 			<v-card-title class="text-subtitle-2"><v-breadcrumbs :items="['42Exam', 'Away']"></v-breadcrumbs></v-card-title>
 		</v-row>
@@ -41,7 +42,7 @@ for (item of all.value)
 				<v-card class="flex-center flex-col" style="min-width: 260px; padding: 12px; gap: 12px;">
 					<v-card-title class="text-subtitle-2">Male</v-card-title>
 					<div v-for="item in entryMale">
-						<Person :api="useFetch" :item="item" :started="started"/>
+						<Person :away="true" :api="useFetch" :item="item" :started="started"/>
 					</div>
 				</v-card>
 			</v-col>
@@ -49,7 +50,7 @@ for (item of all.value)
 				<v-card class="flex-center flex-col" style="min-width: 260px; padding: 12px; gap: 12px;">
 					<v-card-title class="text-subtitle-2">Female</v-card-title>
 					<div v-for="item in entryFemale">
-						<Person :api="useFetch" :item="item" :started="started"/>
+						<Person :away="true" :api="useFetch" :item="item" :started="started"/>
 					</div>
 				</v-card>
 			</v-col>

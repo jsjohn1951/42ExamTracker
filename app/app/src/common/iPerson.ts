@@ -14,7 +14,8 @@ export interface person {
 	username?: string,
 	status: status,
 	gender: gen,
-	num: number
+	num: number,
+	time: string | undefined
 }
 
 export interface api {
@@ -22,5 +23,6 @@ export interface api {
 	user?: string,
 	status: status,
 	gender: gen,
-	num: number
+	num: number,
+	time: string | undefined
 }

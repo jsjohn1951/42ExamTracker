@@ -28,6 +28,23 @@ export class apiUseFetch {
 		return (data as api[]);
 	}
 
+	async time ()
+	{
+		let data: any
+
+		await fetch ('/api/current/time',
+		{
+			method: 'GET',
+		}).then(async(res) => {
+			await res.json().then((d) => {
+				data = d;
+		})
+		}).catch((err) => {
+			console.log('error: ', err);
+		})
+		return (data as number);
+	}
+
 	async started ()
 	{
 		let data: any
@@ -181,6 +198,23 @@ export class apiUseFetch {
 			await res.json().then((d) => {
 				data = d;
 			this.ws.value.send(`deleting user:${id}`)
+		})
+		}).catch((err) => {
+			console.log('error: ', err);
+		})
+	}
+
+	async clearAll()
+	{
+		let data: any;
+
+		await fetch (`/api/v1/users/clear`,
+		{
+			method: 'DELETE',
+		}).then(async(res) => {
+			await res.json().then((d) => {
+				data = d;
+			this.ws.value.send(`deleting all`)
 		})
 		}).catch((err) => {
 			console.log('error: ', err);

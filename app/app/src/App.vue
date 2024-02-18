@@ -6,7 +6,7 @@ import Data from '@/components/Data.vue'
 	<v-theme-provider theme="dark">
 	<v-app style="width: 100vw;">
 			<v-main style="width: 100vw;">
-					<div class="app-container flex-center">
+					<div class="app-container flex-center" style="padding: 50px;">
 						<Suspense>
 							<Data/>
 						</Suspense>

@@ -6,6 +6,7 @@ import InitExam from './InitExam.vue'
 import Person from './Person.vue'
 import Remove from './Remove.vue'
 import Away from './Away.vue'
+import Clear from './Clear.vue'
 import { wSocket } from '../composable/websocket'
 import { apiUseFetch } from '../composable/api'
 
@@ -36,7 +37,8 @@ async function setUp ()
 				username: item.user ? item.user! : '',
 				status: item.status ? item.status! : status.seated,
 				gender: item.gender ? item.gender! : gen.male,
-				num: item.num ? item.num! : 0
+				num: item.num ? item.num! : 0,
+				time: item.time ? item.time : undefined
 			})
 	}
 	started.value = await useFetch.started();
@@ -81,12 +83,20 @@ async function endExam ()
 
 
 		</div>
-		<v-row class="flex-between" style="width: 100%;">
+		<v-row class="flex-between" style="width: 100%; gap: 10px;">
 			<v-col class="flex-start">
 				<InitExam :started="started" :apiUseFetch="useFetch" @start="started = true"/>
 			</v-col>
-			<v-col>
-				<v-card class="flex-center flex-col">
+			<v-col class="flex-center">
+				<Clear :started="started" :apiUseFetch="useFetch"/>
+			</v-col>
+			<v-col class="flex-center">
+				<v-btn @click="endExam()" :disabled="!started" prepend-icon="mdi-meteor">
+					End Exam
+				</v-btn>
+			</v-col>
+		</v-row>
+		<v-card class="flex-center flex-col">
 					<v-card-title class="text-subtitle-2"><v-breadcrumbs :items="['42Exam', 'InsertOrRemove']"></v-breadcrumbs></v-card-title>
 					<v-row>
 						<v-col>
@@ -97,13 +107,6 @@ async function endExam ()
 						</v-col>
 					</v-row>
 				</v-card>
-			</v-col>
-			<v-col @click="endExam()" class="flex-center">
-				<v-btn :disabled="!started" prepend-icon="mdi-meteor">
-					End Exam
-				</v-btn>
-			</v-col>
-		</v-row>
 		<v-card class="flex-center flex-col" style="padding: 0px 15px 0px 15px; max-width: 900px;">
 			<v-card-title class="text-subtitle-2"><v-breadcrumbs :items="['42Exam', 'Control Panel']"></v-breadcrumbs></v-card-title>
 		<v-card style="width: 100%;">
@@ -126,7 +129,7 @@ async function endExam ()
 					<v-container class="pa-2">
 						<v-row>
 							<v-col v-for="item in items">
-								<Person :api="useFetch" :item="item.raw" :started="started"/>
+								<Person :away="false" :api="useFetch" :item="item.raw" :started="started"/>
 							</v-col>
 						</v-row>
 					</v-container>
@@ -146,9 +149,11 @@ async function endExam ()
 		</v-card>
 	</v-card>
 	<v-row>
-		<Suspense>
-			<Away :useFetch="useFetch" :key="toChange"/>
-		</Suspense>
+		<v-col>
+			<Suspense>
+				<Away away :useFetch="useFetch" :key="toChange"/>
+			</Suspense>
+		</v-col>
 	</v-row>
 	</div>
 	</template>

@@ -4,16 +4,48 @@ import { person } from '../common/iPerson'
 import { apiUseFetch } from '../composable/api'
 import { wTimer } from '../composable/websocket'
 import StatusUpdate from './StatusUpdate.vue'
+import { onMounted } from 'vue'
+import { onUnmounted } from 'vue'
 
 const props = defineProps<{
 	api: apiUseFetch,
 	item: person,
-	started: boolean
+	started: boolean,
+	away: boolean
 }>()
 
-let toChange = ref(0);
-let timer: wTimer = new wTimer(toChange, (props.item.id ? props.item.id!.toString() : props.item.username!));
 
+let interval: NodeJS.Timeout
+
+let sec: number = 0
+let min: number = 0
+let hour: number = 0
+const res = ref('00:00:00');
+
+console.log('person:\n', props.item)
+
+if (props.away)
+{
+	let timeBegan = new Date().valueOf();
+	if (props.item.time)
+		timeBegan = new Date(props.item.time).valueOf();
+	interval = setInterval(()=>{
+
+		const current = new Date().valueOf()
+		const timeElapsed = ref(current - timeBegan)
+		timeElapsed.value /= 10;
+		timeElapsed.value /= 100;
+		sec = Math.floor((timeElapsed.value % 60));
+		min = Math.floor(Math.floor(timeElapsed.value / 60) % 60);
+		hour = Math.floor(Math.floor(timeElapsed.value / 3600) % 60) - 4;
+		res.value = `${('00'+hour).slice(-2)}:${('00'+min).slice(-2)}:${('00'+sec).slice(-2)}`;
+	}, 1000);
+}
+
+onUnmounted(()=> {
+	if (props.away)
+		clearInterval(interval)
+})
 </script>
 
 <template>
@@ -30,9 +62,9 @@ let timer: wTimer = new wTimer(toChange, (props.item.id ? props.item.id!.toStrin
 			</template>
 
 			<!-- Timer and number of breaks left -->
-			<div class="d-flex align-center text-caption text-medium-emphasis me-1">
+			<div v-if="away" class="d-flex align-center text-caption text-medium-emphasis me-1">
   				<v-icon icon="mdi-clock" start></v-icon>
-  				<div class="text-truncate">00:00</div>
+  				<div class="text-truncate">{{ res }}</div>
 			</div>
 			<div class="d-flex align-center text-caption text-medium-emphasis me-1">
 				<v-icon icon="mdi-account-reactivate" start></v-icon>
@@ -44,7 +76,7 @@ let timer: wTimer = new wTimer(toChange, (props.item.id ? props.item.id!.toStrin
 		<div class="d-flex justify-space-between px-4">
 
 			<!-- Set Status buttons -->
-			<StatusUpdate :api="api" :timer="timer" :entry="item" :started="started"/>
+			<StatusUpdate :away="true" :api="api" :entry="item" :started="started"/>
 
 		</div>
 	</v-card>

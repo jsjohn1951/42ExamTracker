@@ -11,7 +11,7 @@ export class wTimer {
 
 	constructor(toChange: Ref<number>, id: string)
 	{
-		this.wsTimer = new WebSocket(`ws://10.13.1.11/ws/time/${id}`);
+		this.wsTimer = new WebSocket(`ws://10.18.202.200/ws/time/${id}`);
 		this.wsTimer.onmessage = (event: any) => {
 			console.log('timer data: ', event.data);
 			toChange.value++;
@@ -27,7 +27,7 @@ export class wSocket {
 
 	constructor(toChange: Ref<number>)
 	{
-		ws = new WebSocket("ws://10.13.1.11/ws");
+		ws = new WebSocket("ws://10.18.202.200/ws");
 		ws.onmessage = (event: any) => {
 			toChange.value++;
 		}
