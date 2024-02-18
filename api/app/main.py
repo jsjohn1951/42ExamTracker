@@ -11,13 +11,11 @@ app.breaks = NumBreaks(perFacility=3,perPerson=3)
 app.History = []
 
 def addHistory(user: User) :
-	entry: HistoryEntry = {
-		user.id,
-		user.user,
-		user.status,
-		datetime.now().timestamp()
-	}
-	app.History.append(entry)
+	x = datetime.now();
+	time = x.strftime("%B %d, %Y %H:%M:%S");
+
+	entry = HistoryEntry(id=user.id, user=user.user, event=user.status, time=time);
+	app.History.append(entry);
 
 @app.get("/api")
 def read_root():
@@ -47,6 +45,7 @@ async def rtnHistory() :
 		for item in app.History :
 			line: str = '';
 			if item.id != None :
+				print('--- id: ', item.id, ' ----')
 				line += str(item.id);
 			else :
 				line += item.user;

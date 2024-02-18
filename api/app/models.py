@@ -34,4 +34,4 @@ class HistoryEntry(BaseModel) :
 	id: Optional[int] = None
 	user: Optional[str] = ''
 	event: Optional[Status] = Status.seated
-	time: Optional[float] = 0.0
+	time: Optional[str] = None
