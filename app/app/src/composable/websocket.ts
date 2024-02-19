@@ -2,23 +2,6 @@ import { Ref } from 'vue'
 
 let ws: WebSocket;
 
-export class wTimer {
-	wsTimer: WebSocket;
-	send(data: string | Blob | ArrayBufferView | ArrayBufferLike)
-	{
-		this.wsTimer.send(data);
-	}
-
-	constructor(toChange: Ref<number>, id: string)
-	{
-		this.wsTimer = new WebSocket(`ws://10.18.202.200/ws/time/${id}`);
-		this.wsTimer.onmessage = (event: any) => {
-			console.log('timer data: ', event.data);
-			toChange.value++;
-		}
-	}
-}
-
 export class wSocket {
 	send(data: string | Blob | ArrayBufferView | ArrayBufferLike)
 	{

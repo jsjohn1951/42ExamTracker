@@ -2,7 +2,6 @@
 import { ref } from 'vue'
 import { person } from '../common/iPerson'
 import { apiUseFetch } from '../composable/api'
-import { wTimer } from '../composable/websocket'
 import StatusUpdate from './StatusUpdate.vue'
 import { onMounted } from 'vue'
 import { onUnmounted } from 'vue'
@@ -22,7 +21,7 @@ let min: number = 0
 let hour: number = 0
 const res = ref('00:00:00');
 
-console.log('person:\n', props.item)
+// console.log('person:\n', props.item)
 
 if (props.away)
 {
@@ -64,7 +63,8 @@ onUnmounted(()=> {
 			<!-- Timer and number of breaks left -->
 			<div v-if="away" class="d-flex align-center text-caption text-medium-emphasis me-1">
   				<v-icon icon="mdi-clock" start></v-icon>
-  				<div class="text-truncate">{{ res }}</div>
+  				<div v-if="hour == 0 && min < 15" class="text-truncate">{{ res }}</div>
+				<div v-else class="text-truncate" style="color: red;">{{ res }}</div>
 			</div>
 			<div class="d-flex align-center text-caption text-medium-emphasis me-1">
 				<v-icon icon="mdi-account-reactivate" start></v-icon>

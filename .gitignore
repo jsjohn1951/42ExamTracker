@@ -4,3 +4,4 @@
 */dist
 api/app/__pycache__/
 api/app/new.txt
+*/.txt

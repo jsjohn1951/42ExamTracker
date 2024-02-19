@@ -3,6 +3,7 @@ from fastapi import FastAPI, HTTPException, WebSocket
 from models import User, Status, NumBreaks, Server, ServStart, HistoryEntry
 from wsManager import manager
 from datetime import datetime
+from starlette.responses import FileResponse
 
 app = FastAPI()
 app.db = []
@@ -41,7 +42,10 @@ async def rtnTime() :
 
 @app.get("/api/history")
 async def rtnHistory() :
-	with open('new.txt', mode='+w') as myfile :
+	with open('Logfile.txt', mode='+w') as myfile :
+		x = datetime.now();
+		time = x.strftime("%B %d, %Y %H:%M:%S");
+		myfile.write('History Start:\t' + time + '\n\n');
 		for item in app.History :
 			line: str = '';
 			if item.id != None :
@@ -51,7 +55,12 @@ async def rtnHistory() :
 				line += item.user;
 			line += '\t' + item.event + '\tTime: ' + str(item.time);
 			myfile.write(line + '\n');
-		return app.History
+		myfile.close();
+		return FileResponse('./Logfile.txt', media_type='application/octet-stream',filename='Logfile.txt')
+
+@app.get("/api/breaks")
+async def rtnBreaks() :
+	return app.breaks
 
 @app.post("/api/v1/start")
 async def postStart(run: Server) :
@@ -131,25 +140,11 @@ async def websocket_endpoint(websocket: WebSocket):
 		print("Got an exception ",e);
 		await manager.disconnect('all', websocket);
 
-@app.websocket("/ws/time/{room_id}")
-async def websocket_endpoint(websocket: WebSocket, room_id: str):
-	await manager.connect(room_id, websocket);
-	try:
-		while True:
-			res = await websocket.receive_text();
-			print('res: ', res)
-			await manager.send_personal_message('retrieve',websocket);
-			await manager.broadcast('retrieve', room_id, websocket);
-	except Exception as e:
-		print("Got an exception ",e);
-		await manager.disconnect(room_id, websocket);
-
-
-
 # Deletes
 @app.delete("/api/v1/users/clear")
 async def clear() :
 	app.db.clear();
+	app.History.clear();
 	return ("cleared database")
 
 @app.delete("/api/v1/users/id/{id}")

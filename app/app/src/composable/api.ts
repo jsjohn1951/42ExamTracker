@@ -237,4 +237,46 @@ export class apiUseFetch {
 		})
 		return (data as api[]);
 	}
+
+	async getHistory()
+	{
+		let data: any;
+
+		await fetch (`/api/history`,
+		{
+			method: 'GET',
+		}).then(async(res) => {
+			await res.blob().then((d) => {
+				data = d;
+		})
+		}).catch((err) => {
+			console.log('error: ', err);
+		})
+		console.log('data: ', data);
+		const url = window.URL.createObjectURL(data);
+		let a = document.createElement('a');
+		a.href = url;
+		a.download = "Logfile.txt";
+		document.body.appendChild(a);
+		a.click();
+		a.remove();
+		return (data as string);
+	}
+
+	async getBreaks()
+	{
+		let data: any;
+
+		await fetch (`/api/breaks`,
+		{
+			method: 'GET',
+		}).then(async(res) => {
+			await res.json().then((d) => {
+				data = d;
+		})
+		}).catch((err) => {
+			console.log('error: ', err);
+		})
+		return (data as NumBreaks);
+	}
 }

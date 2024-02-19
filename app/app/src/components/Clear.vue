@@ -24,6 +24,7 @@ async function clearAll()
 		loading.value = false;
 	}
 	dialog.value = false;
+	clear.value = false;
 }
 
 function isClear()
@@ -37,18 +38,18 @@ function isClear()
 
 <template>
 	<v-row justify="center">
-		<v-dialog v-model="dialog" persistent width="500" height="300">
+		<v-dialog @click:outside="dialog = false" v-model="dialog" persistent width="500" height="300">
 			<template v-slot:activator="{ props }">
 			<v-btn :disabled="started" v-bind="props" prepend-icon="mdi-nuke">
-					Clear People
+					Clear
 				</v-btn>
 </template>
       <v-card class="flex-center flex-col">
         <v-card-title>
-          <span class="text-h5">Clear All People From Server</span>
+          <span class="text-h5">Clear All People and History From Server</span>
         </v-card-title>
 		<v-card-subtitle v-if="clear" style="color: red;">
-			This action is permanent!
+			This action is permanent! Are you sure?
 		</v-card-subtitle>
         <v-card-text>
           <v-container class="flex-center flex-col" style="width: 100%;">

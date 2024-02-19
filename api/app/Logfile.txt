@@ -1,0 +1,22 @@
+History Start:	February 18, 2024 17:10:30
+
+3	AWAY	Time: February 18, 2024 17:04:04
+3	SEATED	Time: February 18, 2024 17:04:17
+3	AWAY	Time: February 18, 2024 17:04:35
+3	SEATED	Time: February 18, 2024 17:05:15
+3	AWAY	Time: February 18, 2024 17:05:33
+4	AWAY	Time: February 18, 2024 17:06:35
+5	AWAY	Time: February 18, 2024 17:06:40
+6	SEATED	Time: February 18, 2024 17:06:45
+3	AWAY	Time: February 18, 2024 17:08:20
+6	AWAY	Time: February 18, 2024 17:08:23
+7	AWAY	Time: February 18, 2024 17:08:34
+3	SEATED	Time: February 18, 2024 17:09:31
+4	AWAY	Time: February 18, 2024 17:09:34
+4	SEATED	Time: February 18, 2024 17:09:40
+6	SEATED	Time: February 18, 2024 17:09:42
+7	SEATED	Time: February 18, 2024 17:09:44
+3	AWAY	Time: February 18, 2024 17:10:16
+4	AWAY	Time: February 18, 2024 17:10:19
+3	SEATED	Time: February 18, 2024 17:10:25
+4	SEATED	Time: February 18, 2024 17:10:26

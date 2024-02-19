@@ -7,6 +7,9 @@ import Person from './Person.vue'
 import Remove from './Remove.vue'
 import Away from './Away.vue'
 import Clear from './Clear.vue'
+import EndExam from './EndExam.vue'
+import History from './History.vue'
+import Manual from './Manual.vue'
 import { wSocket } from '../composable/websocket'
 import { apiUseFetch } from '../composable/api'
 
@@ -83,7 +86,7 @@ async function endExam ()
 
 
 		</div>
-		<v-row class="flex-between" style="width: 100%; gap: 10px;">
+		<v-row class="flex-between" style="gap: 30px;">
 			<v-col class="flex-start">
 				<InitExam :started="started" :apiUseFetch="useFetch" @start="started = true"/>
 			</v-col>
@@ -91,11 +94,16 @@ async function endExam ()
 				<Clear :started="started" :apiUseFetch="useFetch"/>
 			</v-col>
 			<v-col class="flex-center">
-				<v-btn @click="endExam()" :disabled="!started" prepend-icon="mdi-meteor">
-					End Exam
-				</v-btn>
+				<Manual :started="started" :apiUseFetch="useFetch"/>
+			</v-col>
+			<v-col class="flex-center">
+				<History :apiUseFetch="useFetch"/>
+			</v-col>
+			<v-col class="flex-center">
+				<EndExam :started="started" :apiUseFetch="useFetch"/>
 			</v-col>
 		</v-row>
+		<div>
 		<v-card class="flex-center flex-col">
 					<v-card-title class="text-subtitle-2"><v-breadcrumbs :items="['42Exam', 'InsertOrRemove']"></v-breadcrumbs></v-card-title>
 					<v-row>
@@ -155,5 +163,6 @@ async function endExam ()
 			</Suspense>
 		</v-col>
 	</v-row>
+	</div>
 	</div>
 	</template>
