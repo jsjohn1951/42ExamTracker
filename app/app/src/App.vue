@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import Data from '@/components/Data.vue'
+
+console.log('time zone: ', Intl.DateTimeFormat().resolvedOptions().timeZone)
 </script>
 
 <template>

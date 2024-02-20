@@ -35,3 +35,6 @@ class HistoryEntry(BaseModel) :
 	user: Optional[str] = ''
 	event: Optional[Status] = Status.seated
 	time: Optional[str] = None
+
+class TMInfo(BaseModel) :
+	tm: Optional[str] = None

@@ -6,7 +6,8 @@ USER root
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update -y --no-install-recommends \
-	&& pip install --upgrade pip
+	&& pip install --upgrade pip \
+	&& pip install pytz
 
 RUN apt-get install \
 	curl \

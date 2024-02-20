@@ -1,18 +1,21 @@
 from typing import List
 from fastapi import FastAPI, HTTPException, WebSocket
-from models import User, Status, NumBreaks, Server, ServStart, HistoryEntry
+from models import User, Status, NumBreaks, Server, ServStart, HistoryEntry, TMInfo
 from wsManager import manager
-from datetime import datetime
+from datetime import datetime, timedelta
 from starlette.responses import FileResponse
+# import pytz
+from zoneinfo import ZoneInfo
 
 app = FastAPI()
 app.db = []
 app.runtime = Server(examStart=ServStart.stopped)
 app.breaks = NumBreaks(perFacility=3,perPerson=3)
 app.History = []
+app.timezone = None
 
 def addHistory(user: User) :
-	x = datetime.now();
+	x = datetime.now(tz=ZoneInfo(app.timezone));
 	time = x.strftime("%B %d, %Y %H:%M:%S");
 
 	entry = HistoryEntry(id=user.id, user=user.user, event=user.status, time=time);
@@ -38,13 +41,13 @@ async def allAway() :
 
 @app.get("/api/current/time")
 async def rtnTime() :
-	return str(datetime.now().timestamp())
+	return str(datetime.now(tz=ZoneInfo(app.timezone)).timestamp())
 
 @app.get("/api/history")
 async def rtnHistory() :
 	with open('Logfile.txt', mode='+w') as myfile :
-		x = datetime.now();
-		time = x.strftime("%B %d, %Y %H:%M:%S");
+		x = datetime.now(tz=ZoneInfo(app.timezone));
+		time = x.strftime("%B %d, %Y");
 		myfile.write('History Start:\t' + time + '\n\n');
 		for item in app.History :
 			line: str = '';
@@ -57,6 +60,27 @@ async def rtnHistory() :
 			myfile.write(line + '\n');
 		myfile.close();
 		return FileResponse('./Logfile.txt', media_type='application/octet-stream',filename='Logfile.txt')
+	
+@app.get("/api/history/{id}")
+async def rtnIdHistory(id: str) :
+	listAll = [entry for entry in app.History if entry.id == int(id)]
+	with open('Logfile_'+id+'.txt', mode='+w') as myfile :
+		x = datetime.now(tz=ZoneInfo(app.timezone));
+		time = x.strftime("%B %d, %Y");
+		myfile.write('History Start:\t' + time + '\n\n');
+		for item in listAll :
+			line: str = '';
+			line += id;
+			line += '\t' + item.event + '\tTime: ' + str(item.time);
+			myfile.write(line + '\n');
+		myfile.close();
+		return FileResponse('Logfile_'+id+'.txt', media_type='application/octet-stream',filename='Logfile_'+id+'.txt')
+
+@app.post("/api/timezone")
+async def rtnTZInfo(timezone: TMInfo) :
+	if (app.timezone == None) :
+		app.timezone = timezone.tm;
+	return (timezone);
 
 @app.get("/api/breaks")
 async def rtnBreaks() :
@@ -92,7 +116,7 @@ async def updateBreaks(recBreaks: NumBreaks) :
 	return app.breaks;
 
 def updateUser(item: User, update: User) :
-	x = datetime.now();
+	x = datetime.now(tz=ZoneInfo(app.timezone));
 	time = x.strftime("%B %d, %Y %H:%M:%S");
 	print('----- time: ', time, ' -----')
 	stat: Status = item.status;

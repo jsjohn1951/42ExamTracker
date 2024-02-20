@@ -2,6 +2,7 @@ import { person, api } from '../common/iPerson';
 import { Ref } from 'vue'
 import { wSocket } from './websocket';
 import { NumBreaks } from '@/common/iNumBreaks';
+import { Blob } from 'buffer';
 
 export class apiUseFetch {
 	ws: Ref<wSocket>;
@@ -278,5 +279,57 @@ export class apiUseFetch {
 			console.log('error: ', err);
 		})
 		return (data as NumBreaks);
+	}
+
+	async getIdHistory(id: string)
+	{
+		let data: any;
+
+		await fetch (`/api/history/${id}`,
+		{
+			method: 'GET',
+		}).then(async(res) => {
+			await res.blob().then((d) => {
+				data = d;
+		})
+		}).catch((err) => {
+			console.log('error: ', err);
+		})
+		console.log('data: ', data);
+		const url = window.URL.createObjectURL(data);
+		let a = document.createElement('a');
+		a.href = url;
+		a.download = `Logfile_${id}.txt`;
+		document.body.appendChild(a);
+		a.click();
+		a.remove();
+		return (data as string);
+	}
+
+	async postTimeZone(tmInfo: string)
+	{
+		const request = {
+			method: "POST",
+    		headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(
+				{
+					tm: tmInfo
+				}
+			)
+		};
+
+		const res = await fetch ('/api/timezone',request).then(async res => {
+			const data = await res.json();
+
+			if (!res.ok)
+			{
+				console.log('error received');
+				return Promise.reject(((data && data.message) || res.status));
+			}
+			this.ws.value.send(request.body)
+		}
+		).catch(error => {
+    	  console.error('There was an error!', error);
+    	});
 	}
 }

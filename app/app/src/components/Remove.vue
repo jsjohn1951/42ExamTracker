@@ -57,7 +57,7 @@ async function submit()
 			<v-text-field
 			v-if="expand"
 			v-model="pUsername"
-			label="Username"
+			label="Inta Login"
 			/>
 		</v-expand-transition>
 

@@ -15,14 +15,18 @@ import { apiUseFetch } from '../composable/api'
 
 const search = ref('');
 const dPersons = ref([] as person[]);
+const searchRes = ref([] as person[]);
 const toChange = ref(0);
 const ws = new wSocket(toChange);
 const useFetch = new apiUseFetch(ref(ws));
 const res = ref(await useFetch.users());
+// searchRes.value = dPersons.value;
 
 let i = 0;
 
 const started = ref(false);
+
+await useFetch.postTimeZone(Intl.DateTimeFormat().resolvedOptions().timeZone);
 
 async function setUp ()
 {
@@ -47,12 +51,36 @@ async function setUp ()
 	started.value = await useFetch.started();
 }
 
-setUp();
+async function sync()
+{
+	let item: person;
+	searchRes.value = [] as person[];
+
+	for (item of dPersons.value)
+	{
+		searchRes.value.push(item);
+	}
+}
+
+await setUp();
+await sync();
+
+watch(search, (newVal, oldVal) => {
+	if (search.value != '')
+	{
+		searchRes.value = dPersons.value.filter((person) => person.id == search.value);
+		if (searchRes.value.length == 0)
+			searchRes.value = dPersons.value.filter((person) => person.username?.includes(search.value));
+	}
+	else
+		searchRes.value = dPersons.value;
+})
 
 watch(toChange, async (newVal, oldVal) => {
 	dPersons.value = [] as person[];
 	res.value = await useFetch.users();
-	setUp();
+	await setUp();
+	await sync();
 })
 
 
@@ -117,8 +145,9 @@ async function endExam ()
 				</v-card>
 		<v-card class="flex-center flex-col" style="padding: 0px 15px 0px 15px; max-width: 900px;">
 			<v-card-title class="text-subtitle-2"><v-breadcrumbs :items="['42Exam', 'Control Panel']"></v-breadcrumbs></v-card-title>
-		<v-card style="width: 100%;">
-			<v-data-iterator :items="dPersons" :items-per-page="9" :search="search">
+		<v-card>
+
+			<v-data-iterator :items="searchRes" :items-per-page="6">
 				<template v-slot:header>
 					<v-toolbar class="px-2">
 						<v-text-field

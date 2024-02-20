@@ -18,7 +18,6 @@ async function update(stat: status)
 {
 	const away = await api.getUsersAway();
 	const breaks = await api.getBreaks();
-	console.log('breaks: ', breaks.perFacility)
 	let gen = away.filter((element, index, array)=>{
 		return (element.gender == entry.value.gender)
 	})
@@ -28,12 +27,28 @@ async function update(stat: status)
 	entry.value.status = stat;
 	await api.putUser(entry.value, num);
 }
+
+async function download()
+{
+	if (entry.value.id && entry.value.id != '')
+		await api.getIdHistory(entry.value.id);
+}
 </script>
 
 <template>
-	<!-- <div style="width: 100%;">
-		<v-row > -->
-			<!-- <v-col class="flex-start"> -->
+		<v-row>
+			<v-col>
+				<v-btn
+				@click="download()"
+				:disabled="!started"
+				border
+				flat
+				size="small"
+				class="text-none"
+				text="Download History" />
+			</v-col>
+
+			<v-col>
 				<v-btn
 				@click="update(status.away)"
 				:disabled="!started || entry.status == status.away || !entry.num"
@@ -42,9 +57,9 @@ async function update(stat: status)
 				size="small"
 				class="text-none"
 				text="Away" />
-			<!-- </v-col> -->
+			</v-col>
 			
-			<!-- <v-col class="flex-center"> -->
+			<v-col>
 				<v-btn
 				@click="update(status.emergency)"
 				:disabled="!started || entry.status == status.emergency"
@@ -53,9 +68,9 @@ async function update(stat: status)
 				size="small"
 				class="text-none"
 				text="Emergency" />
-			<!-- </v-col> -->
+			</v-col>
 			
-			<!-- <v-col class="flex-end"> -->
+			<v-col>
 				<v-btn
 				@click="update(status.seated)"
 				:disabled="!started || entry.status == status.seated"
@@ -63,8 +78,7 @@ async function update(stat: status)
 				flat
 				size="small"
 				class="text-none"
-				text="Seated" />
-			<!-- </v-col> -->
-		<!-- </v-row>
-	</div> -->
+				text="Back" />
+			</v-col>
+		</v-row>
 	</template>

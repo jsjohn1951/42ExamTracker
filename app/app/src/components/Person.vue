@@ -21,8 +21,6 @@ let min: number = 0
 let hour: number = 0
 const res = ref('00:00:00');
 
-// console.log('person:\n', props.item)
-
 if (props.away)
 {
 	let timeBegan = new Date().valueOf();
@@ -36,7 +34,7 @@ if (props.away)
 		timeElapsed.value /= 100;
 		sec = Math.floor((timeElapsed.value % 60));
 		min = Math.floor(Math.floor(timeElapsed.value / 60) % 60);
-		hour = Math.floor(Math.floor(timeElapsed.value / 3600) % 60) - 4;
+		hour = Math.floor(Math.floor(timeElapsed.value / 3600) % 60);
 		res.value = `${('00'+hour).slice(-2)}:${('00'+min).slice(-2)}:${('00'+sec).slice(-2)}`;
 	}, 1000);
 }
@@ -48,16 +46,21 @@ onUnmounted(()=> {
 </script>
 
 <template>
-	<v-card class="pb-3" border flat>
+	<v-card class="pb-3" border flat style="min-width: 250px;">
 	
 		<v-list-item class="mb-2">
 			<template v-slot:title>
 				<!-- <v-row class="flex-between"> -->
 				<div class="flex-between">
 		  			<strong class="text-h6 mb-2">id: {{ item.id }}</strong>
-		  			<strong class="text-h6 mb-2">{{ item.status }}</strong>
+		  			<!-- <strong class="text-h6 mb-2">{{ item.status }}</strong> -->
 		  			<strong class="text-h6 mb-2">{{ item.gender }}</strong>
 		  		</div>
+			</template>
+			<template v-slot:subtitle>
+				<div style="width: 100%;" class="flex-center">
+					<strong class="text-h6 mb-2">{{ item.status }}</strong>
+				</div>
 			</template>
 
 			<!-- Timer and number of breaks left -->
@@ -73,7 +76,8 @@ onUnmounted(()=> {
 		<!-- End Timer and number of breaks left -->
 		</v-list-item>
 
-		<div class="d-flex justify-space-between px-4">
+		
+		<div class="flex-center flex-column" style="padding: 18px;">
 
 			<!-- Set Status buttons -->
 			<StatusUpdate :away="true" :api="api" :entry="item" :started="started"/>

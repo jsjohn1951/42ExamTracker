@@ -32,7 +32,8 @@ async function submit()
 		username: pUsername.value,
 		status: status.seated,
 		gender: pGender.value,
-		num: 0
+		num: 0,
+		time: ''
 	}
 	await api.postUser(nPerson);
 
@@ -62,7 +63,7 @@ async function submit()
 			<v-text-field
 			v-if="expand"
 			v-model="pUsername"
-			label="Username"
+			label="Intra Login"
 			/>
 		</v-expand-transition>
 
