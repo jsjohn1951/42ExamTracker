@@ -38,7 +38,7 @@ function isClear()
 
 <template>
 	<v-row justify="center">
-		<v-dialog @click:outside="dialog = false" v-model="dialog" persistent width="500" height="300">
+		<v-dialog @click:outside="dialog = false" v-model="dialog" persistent width="900" height="300">
 			<template v-slot:activator="{ props }">
 			<v-btn :disabled="started" v-bind="props" prepend-icon="mdi-nuke">
 					Clear
@@ -46,8 +46,21 @@ function isClear()
 </template>
       <v-card class="flex-center flex-col">
         <v-card-title>
-          <span class="text-h5">Clear All People and History From Server</span>
+          <span class="text-h5">Clear All</span>
         </v-card-title>
+		<v-card-subtitle>
+			<ul>
+				<li>
+					Individual Entries
+				</li>
+				<li>
+					Histories
+				</li>
+				<li>
+					History Files
+				</li>
+			</ul>
+		</v-card-subtitle>
 		<v-card-subtitle v-if="clear" style="color: red;">
 			This action is permanent! Are you sure?
 		</v-card-subtitle>

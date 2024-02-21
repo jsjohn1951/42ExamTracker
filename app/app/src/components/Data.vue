@@ -16,11 +16,11 @@ import { apiUseFetch } from '../composable/api'
 const search = ref('');
 const dPersons = ref([] as person[]);
 const searchRes = ref([] as person[]);
+const dis = ref(0);
 const toChange = ref(0);
 const ws = new wSocket(toChange);
 const useFetch = new apiUseFetch(ref(ws));
-const res = ref(await useFetch.users());
-// searchRes.value = dPersons.value;
+const itemsPerPage = ref(6);
 
 let i = 0;
 
@@ -65,7 +65,7 @@ async function sync()
 await setUp();
 await sync();
 
-watch(search, (newVal, oldVal) => {
+watch(search, async (newVal, oldVal) => {
 	if (search.value != '')
 	{
 		searchRes.value = dPersons.value.filter((person) => person.id == search.value);
@@ -73,21 +73,22 @@ watch(search, (newVal, oldVal) => {
 			searchRes.value = dPersons.value.filter((person) => person.username?.includes(search.value));
 	}
 	else
-		searchRes.value = dPersons.value;
+		await sync();
+	dis.value++;
 })
 
 watch(toChange, async (newVal, oldVal) => {
 	dPersons.value = [] as person[];
-	res.value = await useFetch.users();
+	searchRes.value = [] as person[];
 	await setUp();
 	await sync();
+	search.value = '';
+	dis.value++;
 })
 
-
-async function endExam ()
+function updateDisplay()
 {
-	started.value = false;
-	await useFetch.putStart(false);
+	dis.value++;
 }
 </script>
 
@@ -110,8 +111,6 @@ async function endExam ()
 	</div>
 		</v-progress-circular>
 	</v-expand-transition>
-
-
 
 		</div>
 		<v-row class="flex-between" style="gap: 30px;">
@@ -151,19 +150,19 @@ async function endExam ()
 				<template v-slot:header>
 					<v-toolbar class="px-2">
 						<v-text-field
-						v-model="search"
-						clearable
-						density="comfortable"
-						hide-details
-						placeholder="Search"
-						prepend-inner-icon="mdi-magnify"
-						style="max-width: 300px;"
-						variant="solo"
+							v-model="search"
+							clearable
+							density="comfortable"
+							hide-details
+							placeholder="Search"
+							prepend-inner-icon="mdi-magnify"
+							style="max-width: 300px;"
+							variant="solo"
 						/>
 					</v-toolbar>
 				</template>
 				<template v-slot:default="{ items }">
-					<v-container class="pa-2">
+					<v-container class="pa-2" :key="dis">
 						<v-row>
 							<v-col v-for="item in items">
 								<Person :away="false" :api="useFetch" :item="item.raw" :started="started"/>
@@ -175,11 +174,11 @@ async function endExam ()
 				<!-- Footer -->
 				<template v-slot:footer="{ page, pageCount, prevPage, nextPage }">
 					<div class="d-flex align-center justify-center pa-4">
-						<v-btn :disabled="page === 1" icon="mdi-arrow-left" density="comfortable" variant="tonal" rounded @click="prevPage"></v-btn>
+						<v-btn :disabled="page === 1" icon="mdi-arrow-left" density="comfortable" variant="tonal" rounded @click="prevPage(); updateDisplay()"></v-btn>
 						<div class="mx-2 text-caption">
 							Page {{ page }} of {{ pageCount }}
 						</div>
-						<v-btn :disabled="page >= pageCount" icon="mdi-arrow-right" density="comfortable" variant="tonal" rounded @click="nextPage"></v-btn>
+						<v-btn :disabled="page >= pageCount" icon="mdi-arrow-right" density="comfortable" variant="tonal" rounded @click="nextPage(); updateDisplay()"></v-btn>
 					</div>
 				</template>
 			</v-data-iterator>

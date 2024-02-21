@@ -47,7 +47,7 @@ onUnmounted(()=> {
 
 <template>
 	<v-card class="pb-3" border flat style="min-width: 250px;">
-	
+
 		<v-list-item class="mb-2">
 			<template v-slot:title>
 				<!-- <v-row class="flex-between"> -->
@@ -76,7 +76,7 @@ onUnmounted(()=> {
 		<!-- End Timer and number of breaks left -->
 		</v-list-item>
 
-		
+
 		<div class="flex-center flex-column" style="padding: 18px;">
 
 			<!-- Set Status buttons -->

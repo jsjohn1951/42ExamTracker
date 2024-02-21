@@ -34,7 +34,7 @@ async function download()
 			</template>
       <v-card class="flex-center flex-col">
         <v-card-title>
-          <span class="text-h5">Download 'Logfile.txt' to your local machine</span>
+          <span class="text-h5">Download 'Logfile.txt'</span>
         </v-card-title>
         <v-card-actions>
           <v-spacer></v-spacer>

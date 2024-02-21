@@ -29,6 +29,36 @@ async function download()
 			</div>
 			<br>
 			<div>
+				<strong>Staff</strong>:
+				<ol>
+					<img style="width: 100%; max-width: 400px;" src="/example4.png"/>
+					<li>
+						The above panel contains a "<strong>Start Exam</strong>" button that will prompt the staff member to enter the following:
+						<ul>
+							<li>
+								Number Of Entries to Facility Permitted per Person*
+							</li>
+							<li>
+								Total Persons Permitted Within Facility at Once*
+							</li>
+						</ul>
+						Having started the exam, staff and proctors are permitted to update the status of the examinee with the entered limitations.
+					</li>
+					<li>
+						The <strong>Clear</strong> button allows a staff member to clear the history and entries as well as the individual history files.
+						It is important to take into account this action is permanent and would result in the loss of all the data. Ensure all history '<strong>Logfile.txt</strong>' files
+						are downloaded and saved before proceeding.
+					</li>
+					<li>
+						<strong>Download History</strong> grants a proctor / staff the ability to download a history of all the event changes during the exam. This can be done if a staff member needs to look up
+						an '<strong>id</strong> / <strong>Intra login</strong>' for a person who changed their status at a perticular time.
+					</li>
+					<li>
+						<strong>End Exam</strong> will end the current exam session and prompt the staff member to click execute if they would like to download the history for the exam session. It is important to
+						note that the history will not be cleared, and it is recommended to manually clear the history using the <strong>Clear</strong> button before starting a new exam session.
+					</li>
+				</ol>
+				<strong>Staff / Proctors</strong>:
 				<ol>
 					<img style="width: 100%; max-width: 400px;" src="/example2.png"/>
 					<li>Use the 'add' / 'remove' buttons within the "42Exam / InsertOrRemove" section to add a student / pisciner to the session.
