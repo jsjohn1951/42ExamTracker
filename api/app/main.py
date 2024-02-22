@@ -5,6 +5,7 @@ from wsManager import manager
 from datetime import datetime, timedelta
 from starlette.responses import FileResponse
 from zoneinfo import ZoneInfo
+import os
 
 app = FastAPI();
 app.db = [];
@@ -173,6 +174,10 @@ async def websocket_endpoint(websocket: WebSocket):
 async def clear() :
 	app.db.clear();
 	app.History.clear();
+	dir = os.listdir('./')
+	for item in dir :
+		if item.endswith(".txt") :
+			os.remove('./' + item);
 	return ("cleared database")
 
 @app.delete("/api/v1/users/id/{id}")

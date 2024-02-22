@@ -122,25 +122,6 @@ function updateDisplay()
 <template>
 	<div class="flex-center flex-col" style="width: 100vw; height: fit-content; padding: 18px; gap: 24px;">
 		<Timer v-if="started" :api="useFetch"/>
-		<!-- <div style="height: fit-content;">
-
-		<v-expand-transition>
-		<v-progress-circular
-			v-if="started"
-			indeterminate
-      color="green"
-	  :rotate="360"
-      :size="200"
-      :width="10"
-    >
-	<div class="flex-center flex-col" style="gap: 15px;">
-			<div class="text-truncate">{{ timer }}</div>
-			<div>Exam in Progress</div>
-	</div>
-		</v-progress-circular>
-	</v-expand-transition>
-
-		</div> -->
 		<v-row class="flex-between" style="gap: 30px;">
 			<v-col class="flex-start">
 				<InitExam :started="started" :apiUseFetch="useFetch" @start="started = true"/>
