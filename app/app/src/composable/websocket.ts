@@ -10,7 +10,7 @@ export class wSocket {
 
 	constructor(toChange: Ref<number>)
 	{
-		ws = new WebSocket("ws://10.13.4.4/ws");
+		ws = new WebSocket("ws://10.18.202.200/ws");
 		ws.onmessage = (event: any) => {
 			toChange.value++;
 		}

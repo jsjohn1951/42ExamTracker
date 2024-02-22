@@ -63,6 +63,23 @@ export class apiUseFetch {
 		return (data as string == "STARTED" ? true : false);
 	}
 
+	async timeStarted ()
+	{
+		let data: any
+
+		await fetch ('/api/time/startTime',
+		{
+			method: 'GET',
+		}).then(async(res) => {
+			await res.json().then((d) => {
+				data = d;
+		})
+		}).catch((err) => {
+			console.log('error: ', err);
+		})
+		return (data as string);
+	}
+
 	async postBreaks (breaks: NumBreaks)
 	{
 		const request = {

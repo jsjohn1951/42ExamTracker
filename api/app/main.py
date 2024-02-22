@@ -4,15 +4,15 @@ from models import User, Status, NumBreaks, Server, ServStart, HistoryEntry, TMI
 from wsManager import manager
 from datetime import datetime, timedelta
 from starlette.responses import FileResponse
-# import pytz
 from zoneinfo import ZoneInfo
 
-app = FastAPI()
-app.db = []
-app.runtime = Server(examStart=ServStart.stopped)
-app.breaks = NumBreaks(perFacility=3,perPerson=3)
-app.History = []
-app.timezone = None
+app = FastAPI();
+app.db = [];
+app.runtime = Server(examStart=ServStart.stopped);
+app.breaks = NumBreaks(perFacility=3,perPerson=3);
+app.History = [];
+app.timezone = None;
+app.startTime = datetime.now(tz=ZoneInfo("Asia/Dubai"));
 
 def addHistory(user: User) :
 	x = datetime.now(tz=ZoneInfo(app.timezone));
@@ -28,7 +28,6 @@ def read_root():
 @app.get("/api/v1/users")
 async def fetch_users() :
 	return app.db;
-
 
 @app.get("/api/v1/start")
 async def isStart() :
@@ -75,6 +74,10 @@ async def rtnIdHistory(id: str) :
 			myfile.write(line + '\n');
 		myfile.close();
 		return FileResponse('Logfile_'+id+'.txt', media_type='application/octet-stream',filename='Logfile_'+id+'.txt')
+	
+@app.get("/api/time/startTime")
+async def rtnStartTime() :
+	return (app.startTime);
 
 @app.post("/api/timezone")
 async def rtnTZInfo(timezone: TMInfo) :
@@ -90,6 +93,7 @@ async def rtnBreaks() :
 async def postStart(run: Server) :
 	for item in app.db :
 		item.status = Status.seated;
+	app.startTime = datetime.now(tz=ZoneInfo(app.timezone));
 	app.runtime.examStart = run.examStart;
 
 # posts

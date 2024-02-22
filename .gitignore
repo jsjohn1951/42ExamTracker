@@ -3,5 +3,5 @@
 .DS_Store
 */dist
 api/app/__pycache__/
-api/app/new.txt
+api/app/Logfile.txt
 */.txt

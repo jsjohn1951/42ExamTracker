@@ -3,7 +3,6 @@ import { ref } from 'vue'
 import { person } from '../common/iPerson'
 import { apiUseFetch } from '../composable/api'
 import StatusUpdate from './StatusUpdate.vue'
-import { onMounted } from 'vue'
 import { onUnmounted } from 'vue'
 
 const props = defineProps<{

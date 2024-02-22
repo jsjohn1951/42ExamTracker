@@ -10,6 +10,7 @@ import Clear from './Clear.vue'
 import EndExam from './EndExam.vue'
 import History from './History.vue'
 import Manual from './Manual.vue'
+import Timer from './Timer.vue'
 import { wSocket } from '../composable/websocket'
 import { apiUseFetch } from '../composable/api'
 
@@ -20,7 +21,13 @@ const dis = ref(0);
 const toChange = ref(0);
 const ws = new wSocket(toChange);
 const useFetch = new apiUseFetch(ref(ws));
-const itemsPerPage = ref(6);
+
+// Timer
+// const timer = ref('00:00:00');
+// let interval: NodeJS.Timeout
+// let sec: number = 0
+// let min: number = 0
+// let hour: number = 0
 
 let i = 0;
 
@@ -62,8 +69,28 @@ async function sync()
 	}
 }
 
+// async function setTimer()
+// {
+// 	if (!started.value)
+// 		return ;
+// 	const timeStarted = await useFetch.timeStarted();
+// 	console.log(timeStarted.valueOf());
+// 	const timeBegan = new Date(timeStarted).valueOf();
+// 	interval = setInterval(()=>{
+// 		const current = new Date().valueOf()
+// 		const timeElapsed = ref(current - timeBegan)
+// 		timeElapsed.value /= 10;
+// 		timeElapsed.value /= 100;
+// 		sec = Math.floor((timeElapsed.value % 60));
+// 		min = Math.floor(Math.floor(timeElapsed.value / 60) % 60);
+// 		hour = Math.floor(Math.floor(timeElapsed.value / 3600) % 60);
+// 		timer.value = `${('00'+hour).slice(-2)}:${('00'+min).slice(-2)}:${('00'+sec).slice(-2)}`;
+// }, 1000);
+// }
+
 await setUp();
 await sync();
+// await setTimer();
 
 watch(search, async (newVal, oldVal) => {
 	if (search.value != '')
@@ -94,7 +121,8 @@ function updateDisplay()
 
 <template>
 	<div class="flex-center flex-col" style="width: 100vw; height: fit-content; padding: 18px; gap: 24px;">
-		<div style="height: fit-content;">
+		<Timer v-if="started" :api="useFetch"/>
+		<!-- <div style="height: fit-content;">
 
 		<v-expand-transition>
 		<v-progress-circular
@@ -106,13 +134,13 @@ function updateDisplay()
       :width="10"
     >
 	<div class="flex-center flex-col" style="gap: 15px;">
-			<img src="https://42.fr/wp-content/uploads/2021/05/42-Final-sigle-seul.svg">
+			<div class="text-truncate">{{ timer }}</div>
 			<div>Exam in Progress</div>
 	</div>
 		</v-progress-circular>
 	</v-expand-transition>
 
-		</div>
+		</div> -->
 		<v-row class="flex-between" style="gap: 30px;">
 			<v-col class="flex-start">
 				<InitExam :started="started" :apiUseFetch="useFetch" @start="started = true"/>
