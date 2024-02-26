@@ -1,13 +1,18 @@
 FROM python:3-bullseye
 
-USER root
-
+# ! set env variables
 # ! noninteractive - zero interaction while installing or upgrading with apt
 ENV DEBIAN_FRONTEND=noninteractive
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 
 RUN apt-get update -y --no-install-recommends \
 	&& pip install --upgrade pip \
-	&& pip install pytz
+	&& pip install pytz \
+	&& pip install sqlalchemy \
+	&& pip install asyncpg \
+	&& pip install ormar \
+	&& pip install psycopg2-binary
 
 RUN apt-get install \
 	curl \

@@ -1,19 +1,31 @@
 from typing import List
-from fastapi import FastAPI, HTTPException, WebSocket
-from models import User, Status, NumBreaks, Server, ServStart, HistoryEntry, TMInfo
+from fastapi import Depends, FastAPI, HTTPException, WebSocket
+from schemas import User, Status, NumBreaks, Server, ServStart, HistoryEntry, TMInfo
 from wsManager import manager
-from datetime import datetime, timedelta
+from datetime import datetime
 from starlette.responses import FileResponse
 from zoneinfo import ZoneInfo
+from crud import start, shutdown, \
+	get_isStarted, \
+	add_breaks, get_breaks, \
+	update_breaks, get_user_id, \
+	get_user_user, get_users, \
+	create_user, update_user, delete_user, \
+	add_History, clear_history
+from database import SessionLocal
+from sqlalchemy.orm import Session
+from utils import get_db, setAppUsers, \
+	setAppStarted, setAppBreaks, updateUser, \
+	setAppStartTm, setAppHistory
 import os
 
 app = FastAPI();
-app.db = [];
-app.runtime = Server(examStart=ServStart.stopped);
-app.breaks = NumBreaks(perFacility=3,perPerson=3);
-app.History = [];
+app.db = setAppUsers();
+app.runtime = setAppStarted();
+app.breaks = setAppBreaks();
+app.History = setAppHistory();
 app.timezone = None;
-app.startTime = datetime.now(tz=ZoneInfo("Asia/Dubai"));
+app.startTime = setAppStartTm();
 
 def addHistory(user: User) :
 	x = datetime.now(tz=ZoneInfo(app.timezone));
@@ -21,6 +33,7 @@ def addHistory(user: User) :
 
 	entry = HistoryEntry(id=user.id, user=user.user, event=user.status, time=time);
 	app.History.append(entry);
+	add_History(SessionLocal(), entry);
 
 @app.get("/api")
 def read_root():
@@ -90,16 +103,20 @@ async def rtnTZInfo(timezone: TMInfo) :
 async def rtnBreaks() :
 	return app.breaks
 
+# ! -------------------------------- posts  -------------------------------- 
 @app.post("/api/v1/start")
-async def postStart(run: Server) :
+async def postStart(run: Server, db: Session = Depends(get_db)) :
 	for item in app.db :
 		item.status = Status.seated;
 	app.startTime = datetime.now(tz=ZoneInfo(app.timezone));
 	app.runtime.examStart = run.examStart;
+	if (app.runtime.examStart == ServStart.start) :
+		start(db, str(app.startTime.timestamp()));
+	else :
+		shutdown(db);
 
-# posts
 @app.post("/api/v1/users")
-async def reg_user(user: User) :
+async def reg_user(user: User, db: Session = Depends(get_db)) :
 	if (user.id == 0 and user.user == '') :
 		raise HTTPException(
 			status_code = 400,
@@ -111,42 +128,35 @@ async def reg_user(user: User) :
 			return user;
 	user.num = app.breaks.perPerson;
 	app.db.append(user);
+	create_user(db=db, user=user);
 	return user;
 
 @app.post("/api/v1/breaks")
-async def updateBreaks(recBreaks: NumBreaks) :
+async def updateBreaks(recBreaks: NumBreaks, db: Session = Depends(get_db)) :
 	app.breaks = recBreaks;
 	for item in app.db :
 		item.num = app.breaks.perPerson;
+	if (get_breaks(db) == None) :
+		add_breaks(db, app.breaks);
+	else :
+		update_breaks(db, app.breaks);
 	return app.breaks;
-
-def updateUser(item: User, update: User) :
-	x = datetime.now(tz=ZoneInfo(app.timezone));
-	time = x.strftime("%B %d, %Y %H:%M:%S");
-	print('----- time: ', time, ' -----')
-	stat: Status = item.status;
-	if (item.status != update.status) :
-		item.status = update.status;
-	if (item.status == Status.away) :
-		if (item.num > 0) :
-			item.num = item.num - 1;
-			item.time = time;
-		else :
-			item.status = stat;
 
 # Updates
 @app.put("/api/v1/users")
-async def up_user(update: User) :
+async def up_user(update: User, db: Session = Depends(get_db)) :
 	if (update.id != None and update.id != 0) :
 		for item in app.db :
 			if (item.id == update.id) :
-				updateUser(item, update);
+				updateUser(item, update, ZoneInfo(app.timezone));
+				update_user(db, item);
 				addHistory(update);
 				return ;
 	elif (update.user != None and update.user != '') :
 		for item in app.db :
 			if (item.user == update.user) :
-				updateUser(item, update);
+				updateUser(item, update, ZoneInfo(app.timezone));
+				update_user(db, item, False);
 				addHistory(update);
 				return ;
 	raise HTTPException(
@@ -155,7 +165,7 @@ async def up_user(update: User) :
 	)
 
 
-# Web Sockets
+# ! -------------------------------- Web Sockets --------------------------------
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
 	await manager.connect('all', websocket);
@@ -169,10 +179,16 @@ async def websocket_endpoint(websocket: WebSocket):
 		print("Got an exception ",e);
 		await manager.disconnect('all', websocket);
 
-# Deletes
+# ! -------------------------------- Deletes --------------------------------
 @app.delete("/api/v1/users/clear")
-async def clear() :
+async def clear(db: Session = Depends(get_db)) :
+	for item in app.db :
+		if (item.id != 0) :
+			delete_user(db, item);
+		else :
+			delete_user(db, item, False);
 	app.db.clear();
+	clear_history(db);
 	app.History.clear();
 	dir = os.listdir('./')
 	for item in dir :
@@ -181,10 +197,11 @@ async def clear() :
 	return ("cleared database")
 
 @app.delete("/api/v1/users/id/{id}")
-async def rm_user(id: str) :
+async def rm_user(id: str, db: Session = Depends(get_db)) :
 	usr_id = int(id);
 	for item in app.db :
 		if (item.id == usr_id) :
+			delete_user(db, item);
 			return app.db.remove(item);
 	raise HTTPException(
 		status_code = 404,
@@ -192,9 +209,10 @@ async def rm_user(id: str) :
 	);
 
 @app.delete("/api/v1/users/user/{id}")
-async def rm_user(id: str) :
+async def rm_user(id: str, db: Session = Depends(get_db)) :
 	for item in app.db :
 		if (item.user == id) :
+			delete_user(db, item, False);
 			return app.db.remove(item);
 	raise HTTPException(
 		status_code = 404,

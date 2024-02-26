@@ -2,39 +2,37 @@ from pydantic import BaseModel
 from typing import Optional
 from enum import Enum
 
-class Status(str, Enum) :
-	seated = "SEATED"
-	away = "AWAY"
-	emergency = "EMERGENCY"
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
+from sqlalchemy.orm import relationship
+from database import Base
 
-class Gender(str, Enum) :
-	male = "Male"
-	female = "Female"
+class dbUser(Base) :
+	__tablename__ = "user"
 
-class ServStart(str, Enum) :
-	start = "STARTED"
-	stopped = "NOT RUNNING"
+	id = Column(Integer, unique=True, primary_key=True)
+	user = Column(String, unique=True, index=True)
+	gender = Column(String, index=True)
+	status = Column(String, index=True)
+	num = Column(Integer, index=True)
+	time = Column(String, index=True)
 
-class User(BaseModel) :
-	id: Optional[int] = None
-	user: Optional[str] = ''
-	gender: Optional[Gender] = "Male"
-	status: Optional[Status] = "SEATED"
-	num: Optional[int] = 3
-	time: Optional[str] = None
+class dbBreaks(Base) :
+	__tablename__ = "breaks"
 
-class NumBreaks(BaseModel) :
-	perFacility: int
-	perPerson: int
+	id = Column(Integer, unique=True, primary_key=True)
+	perfacility = Column(Integer, index=True)
+	perperson = Column(Integer, index=True)
 
-class Server(BaseModel) :
-	examStart: Optional[ServStart] = "NOT RUNNING"
+class dbStarted(Base) :
+	__tablename__ = "started"
 
-class HistoryEntry(BaseModel) :
-	id: Optional[int] = None
-	user: Optional[str] = ''
-	event: Optional[Status] = Status.seated
-	time: Optional[str] = None
+	isstarted = Column(Boolean, primary_key=True)
+	timestarted = Column(String, index=True);
 
-class TMInfo(BaseModel) :
-	tm: Optional[str] = None
+class dbHistory(Base) :
+	__tablename__ = "history"
+
+	id = Column(Integer, primary_key=True)
+	user = Column(String, index=True)
+	event = Column(String, index=True)
+	time = Column(String, index=True)

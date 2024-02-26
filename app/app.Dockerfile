@@ -1,7 +1,5 @@
 FROM debian:bookworm-slim
 
-USER root
-
 # ! noninteractive - zero interaction while installing or upgrading with apt
 ENV DEBIAN_FRONTEND=noninteractive
 

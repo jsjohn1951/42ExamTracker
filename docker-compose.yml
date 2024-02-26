@@ -5,7 +5,28 @@ networks:
     driver: bridge
 
 services:
+  db:
+    container_name: core_db
+    image: postgres:16-alpine
+    restart: always
+    volumes:
+      - ./db:/var/lib/postgresql/data
+    env_file:
+      - .env/.env
+    networks:
+      - network
+    healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB -h db"]
+        interval: 10s
+        timeout: 5s
+        retries: 5
+    ports:
+      - 5432:5432
+
   api:
+    depends_on:
+      db:
+        condition: service_healthy
     container_name: core_api
     build:
       context: ./api
@@ -13,6 +34,8 @@ services:
     restart: on-failure
     volumes:
       - ./api/app:/app
+    env_file:
+      - .env/.env
     networks:
       - network
     entrypoint: ["sh", "-C", "/scripts/start.sh"]
@@ -27,6 +50,7 @@ services:
     restart: on-failure
     volumes:
       - ./app/app:/app
+      - ./.env/.env:/app/.env
     networks:
       - network
     entrypoint: ["sh", "-C", "/scripts/start.sh"]

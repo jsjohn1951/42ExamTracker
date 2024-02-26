@@ -5,3 +5,5 @@
 api/app/__pycache__/
 api/app/Logfile.txt
 */.txt
+*/.env
+app/app/.env

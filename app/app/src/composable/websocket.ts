@@ -10,7 +10,10 @@ export class wSocket {
 
 	constructor(toChange: Ref<number>)
 	{
-		ws = new WebSocket("ws://10.18.202.200/ws");
+		if (import.meta.env.VITE_MODE === "DEV")
+			ws = new WebSocket(`ws://${import.meta.env.VITE_URL}/ws`);
+		else
+			ws = new WebSocket(`wss://${import.meta.env.VITE_URL}/ws`);
 		ws.onmessage = (event: any) => {
 			toChange.value++;
 		}
