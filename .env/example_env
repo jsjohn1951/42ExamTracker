@@ -5,5 +5,10 @@ POSTGRES_DB="ExpectoExaminarXLII"
 POSTGRES_HOST="ExpectoExaminarHost"
 POSTGRES_PORT="5432"
 
+ADMIN_USR="XLII_Admin"
+ADMIN_PW="xlii42adminpw@"
+
+SECRET="3f1f4acb081f02f7b03b9f6d5dfb0a4d7be44f1ff9374bddbbdb6cd638fb2a3d"
+
 # url/ip
 VITE_URL="10.18.202.200"

@@ -42,3 +42,7 @@ class HistoryEntry(BaseModel) :
 
 class TMInfo(BaseModel) :
 	tm: Optional[str] = None
+
+class admin(BaseModel) :
+	username: str = None
+	password: str = None

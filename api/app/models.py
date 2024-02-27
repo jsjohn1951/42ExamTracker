@@ -36,3 +36,9 @@ class dbHistory(Base) :
 	user = Column(String, index=True)
 	event = Column(String, index=True)
 	time = Column(String, index=True)
+
+class dbAdmin(Base) :
+	__tablename__ = "admin"
+
+	username = Column(String, primary_key=True)
+	hashauthentication = Column(String, index=True)

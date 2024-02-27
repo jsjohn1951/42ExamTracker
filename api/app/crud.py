@@ -2,8 +2,31 @@ from sqlalchemy.orm import Session
 
 from typing import List
 
-from models import dbUser, dbBreaks, dbStarted, dbHistory
-from schemas import User, NumBreaks, ServStart, HistoryEntry
+from models import dbUser, dbBreaks, dbStarted, dbHistory, dbAdmin
+from schemas import User, NumBreaks, ServStart, HistoryEntry, admin
+from database import SessionLocal
+from fastapi import Depends
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+# ! --------------------- Auth ---------------------
+
+def create_admin(username: str, password: str) :
+    db = SessionLocal();
+    oldAdmin = db.query(dbAdmin).filter(dbAdmin.username == username).first();
+    if (oldAdmin != None) :
+        return None;
+    dbusr: dbAdmin = dbAdmin(username=username,
+                             hashauthentication=password);
+    db.add(dbusr);
+    db.commit();
+    db.refresh(dbusr);
+    return dbusr;
 
 # ! --------------------- started ---------------------
 def start(db: Session, tm: str) :

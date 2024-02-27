@@ -4,6 +4,12 @@ from schemas import User, NumBreaks, Status, Server, ServStart, HistoryEntry
 from crud import get_users, get_breaks, get_isStarted, get_startTime, get_history
 from datetime import datetime
 from zoneinfo import ZoneInfo
+from passlib.context import CryptContext
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto");
+
+def hash_pass(password:str):
+    return pwd_context.hash(password)
 
 def get_db():
     db = SessionLocal()

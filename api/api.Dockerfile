@@ -1,4 +1,4 @@
-FROM python:3-bullseye
+FROM python:bullseye
 
 # ! set env variables
 # ! noninteractive - zero interaction while installing or upgrading with apt
@@ -6,13 +6,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-RUN apt-get update -y --no-install-recommends \
-	&& pip install --upgrade pip \
-	&& pip install pytz \
-	&& pip install sqlalchemy \
-	&& pip install asyncpg \
-	&& pip install ormar \
-	&& pip install psycopg2-binary
+RUN apt-get update -y --no-install-recommends
 
 RUN apt-get install \
 	curl \
@@ -21,6 +15,15 @@ RUN apt-get install \
 	g++ \
 	dialog \
 	-y --no-install-recommends
+
+RUN pip install --upgrade pip \
+	&& pip install pytz \
+	&& pip install sqlalchemy \
+	&& pip install asyncpg \
+	&& pip install ormar \
+	&& pip install psycopg2-binary \
+	&& pip install passlib \
+	&& pip install python-jose[cryptography]
 
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
 

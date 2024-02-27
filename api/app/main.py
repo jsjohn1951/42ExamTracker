@@ -1,6 +1,6 @@
 from typing import List
 from fastapi import Depends, FastAPI, HTTPException, WebSocket
-from schemas import User, Status, NumBreaks, Server, ServStart, HistoryEntry, TMInfo
+from schemas import User, Status, NumBreaks, Server, ServStart, HistoryEntry, TMInfo, admin
 from wsManager import manager
 from datetime import datetime
 from starlette.responses import FileResponse
@@ -11,12 +11,12 @@ from crud import start, shutdown, \
 	update_breaks, get_user_id, \
 	get_user_user, get_users, \
 	create_user, update_user, delete_user, \
-	add_History, clear_history
+	add_History, clear_history, create_admin
 from database import SessionLocal
 from sqlalchemy.orm import Session
 from utils import get_db, setAppUsers, \
 	setAppStarted, setAppBreaks, updateUser, \
-	setAppStartTm, setAppHistory
+	setAppStartTm, setAppHistory, hash_pass
 import os
 
 app = FastAPI();
@@ -26,6 +26,7 @@ app.breaks = setAppBreaks();
 app.History = setAppHistory();
 app.timezone = None;
 app.startTime = setAppStartTm();
+create_admin(username=os.getenv("ADMIN_USR"), password=hash_pass(os.getenv("ADMIN_PW")));
 
 def addHistory(user: User) :
 	x = datetime.now(tz=ZoneInfo(app.timezone));
