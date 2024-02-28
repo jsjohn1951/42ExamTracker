@@ -1,6 +1,7 @@
 from typing import List
-from fastapi import Depends, FastAPI, HTTPException, WebSocket
-from schemas import User, Status, NumBreaks, Server, ServStart, HistoryEntry, TMInfo, admin
+from fastapi import Depends, APIRouter, FastAPI, HTTPException, WebSocket, status
+from fastapi.security import OAuth2PasswordRequestForm
+from schemas import User, Status, NumBreaks, Server, ServStart, HistoryEntry, TMInfo, admin, Token
 from wsManager import manager
 from datetime import datetime
 from starlette.responses import FileResponse
@@ -11,12 +12,13 @@ from crud import start, shutdown, \
 	update_breaks, get_user_id, \
 	get_user_user, get_users, \
 	create_user, update_user, delete_user, \
-	add_History, clear_history, create_admin
+	add_History, clear_history, create_admin, get_admin
 from database import SessionLocal
 from sqlalchemy.orm import Session
 from utils import get_db, setAppUsers, \
 	setAppStarted, setAppBreaks, updateUser, \
-	setAppStartTm, setAppHistory, hash_pass
+	setAppStartTm, setAppHistory, hash_pass, verify_password
+from OAuth import create_token
 import os
 
 app = FastAPI();
@@ -26,6 +28,7 @@ app.breaks = setAppBreaks();
 app.History = setAppHistory();
 app.timezone = None;
 app.startTime = setAppStartTm();
+
 create_admin(username=os.getenv("ADMIN_USR"), password=hash_pass(os.getenv("ADMIN_PW")));
 
 def addHistory(user: User) :
@@ -35,6 +38,16 @@ def addHistory(user: User) :
 	entry = HistoryEntry(id=user.id, user=user.user, event=user.status, time=time);
 	app.History.append(entry);
 	add_History(SessionLocal(), entry);
+
+@app.post("/api/login", response_model=Token, tags=['Authenticate'])
+def login(userdetails: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)) :
+	user = get_admin();
+	if not user or user.username != userdetails.username :
+		raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"User Not Found");
+	if not verify_password(userdetails.password, user.hashauthentication) :
+		raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Password Mismatch");
+	access_token = create_token({"user_id" : user.username});
+	return {"access_token" : access_token, "token_type" : "bearer"};
 
 @app.get("/api")
 def read_root():

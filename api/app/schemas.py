@@ -46,3 +46,10 @@ class TMInfo(BaseModel) :
 class admin(BaseModel) :
 	username: str = None
 	password: str = None
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class DataToken(BaseModel):
+    id: Optional[str] = None

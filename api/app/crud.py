@@ -28,6 +28,11 @@ def create_admin(username: str, password: str) :
     db.refresh(dbusr);
     return dbusr;
 
+def get_admin() :
+    db = SessionLocal();
+    Admin = db.query(dbAdmin).first();
+    return Admin;
+
 # ! --------------------- started ---------------------
 def start(db: Session, tm: str) :
     db_start = db.query(dbStarted).first();

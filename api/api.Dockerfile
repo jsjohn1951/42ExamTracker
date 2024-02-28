@@ -23,7 +23,8 @@ RUN pip install --upgrade pip \
 	&& pip install ormar \
 	&& pip install psycopg2-binary \
 	&& pip install passlib \
-	&& pip install python-jose[cryptography]
+	&& pip install python-jose[cryptography] \
+	&& pip install python-multipart
 
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
 
