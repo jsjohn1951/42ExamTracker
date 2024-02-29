@@ -38,11 +38,11 @@ def setAppUsers() :
     print('---- init Users ----- : ', users);
     for item in users :
         appdb.append(User(id=item.id,
-					user=item.user,
+					user=item.user_id,
 					gender=item.gender,
-					status=item.status,
+					status=item.usr_status,
 					num=item.num,
-					time=item.time));
+					time=item.time_stamp));
     print('------ users inserted! Returning ------');
     return (appdb);
 
@@ -52,9 +52,9 @@ def setAppHistory() :
     print('---- init History ----- : ', entries);
     for item in entries :
         appEntr.append(HistoryEntry(id=item.id,
-					user=item.user,
-					event=item.event,
-					time=item.time));
+					user=item.user_id,
+					event=item.event_oc,
+					time=item.time_stamp));
     print('------ users inserted! Returning ------');
     return (appEntr);
 

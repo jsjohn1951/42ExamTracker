@@ -18,8 +18,10 @@ from sqlalchemy.orm import Session
 from utils import get_db, setAppUsers, \
 	setAppStarted, setAppBreaks, updateUser, \
 	setAppStartTm, setAppHistory, hash_pass, verify_password
-from OAuth import create_token, get_current_user
+from OAuth import create_token, get_current_user, oauth2_schema
 import os
+from typing_extensions import Annotated
+# import fastapi.middleware.wsgi
 
 app = FastAPI();
 app.db = setAppUsers();
@@ -28,6 +30,7 @@ app.breaks = setAppBreaks();
 app.History = setAppHistory();
 app.timezone = None;
 app.startTime = setAppStartTm();
+# app.add_middleware()
 
 create_admin(username=os.getenv("ADMIN_USR"), password=hash_pass(os.getenv("ADMIN_PW")));
 
@@ -55,24 +58,24 @@ def login(userdetails: OAuth2PasswordRequestForm = Depends(), db: Session = Depe
 	return {"access_token" : access_token, "token_type" : "bearer"};
 
 @app.get("/api/v1/users", tags=['Entries'])
-async def fetch_users() :
+async def fetch_users(token: Annotated[str, Depends(get_current_user)]) :
 	return app.db;
 
 @app.get("/api/v1/start", tags=['Runtime'])
-async def isStart() :
+async def isStart(token: Annotated[str, Depends(get_current_user)]) :
 	return app.runtime.examStart;
 
 @app.get("/api/v1/users/away", tags=['Status Away'])
-async def allAway() :
+async def allAway(token: Annotated[str, Depends(get_current_user)]) :
 	listAll = [entry for entry in app.db if entry.status == Status.away];
 	return listAll;
 
 @app.get("/api/current/time", tags=['Time'])
-async def rtnTime() :
+async def rtnTime(token: Annotated[str, Depends(get_current_user)]) :
 	return str(datetime.now(tz=ZoneInfo(app.timezone)).timestamp())
 
 @app.get("/api/history", tags=['History'])
-async def rtnHistory() :
+async def rtnHistory(token: Annotated[str, Depends(get_current_user)]) :
 	with open('Logfile.txt', mode='+w') as myfile :
 		x = datetime.now(tz=ZoneInfo(app.timezone));
 		time = x.strftime("%B %d, %Y");
@@ -90,7 +93,7 @@ async def rtnHistory() :
 		return FileResponse('./Logfile.txt', media_type='application/octet-stream',filename='Logfile.txt')
 	
 @app.get("/api/history/{id}", tags=['History'])
-async def rtnIdHistory(id: str) :
+async def rtnIdHistory(token: Annotated[str, Depends(get_current_user)], id: str) :
 	listAll = [entry for entry in app.History if entry.id == int(id)]
 	with open('Logfile_'+id+'.txt', mode='+w') as myfile :
 		x = datetime.now(tz=ZoneInfo(app.timezone));
@@ -105,22 +108,22 @@ async def rtnIdHistory(id: str) :
 		return FileResponse('Logfile_'+id+'.txt', media_type='application/octet-stream',filename='Logfile_'+id+'.txt')
 	
 @app.get("/api/time/startTime", tags=['Time'])
-async def rtnStartTime() :
+async def rtnStartTime(token: Annotated[str, Depends(get_current_user)]) :
 	return (app.startTime);
 
 @app.post("/api/timezone", tags=['Time'])
-async def rtnTZInfo(timezone: TMInfo) :
+async def rtnTZInfo(token: Annotated[str, Depends(get_current_user)], timezone: TMInfo) :
 	if (app.timezone == None) :
 		app.timezone = timezone.tm;
 	return (timezone);
 
 @app.get("/api/breaks", tags=['Breaks'])
-async def rtnBreaks() :
+async def rtnBreaks(token: Annotated[str, Depends(get_current_user)]) :
 	return app.breaks
 
 # ! -------------------------------- posts  -------------------------------- 
 @app.post("/api/v1/start", tags=['Runtime'])
-async def postStart(run: Server, db: Session = Depends(get_db)) :
+async def postStart(token: Annotated[str, Depends(get_current_user)], run: Server, db: Session = Depends(get_db)) :
 	for item in app.db :
 		item.status = Status.seated;
 	app.startTime = datetime.now(tz=ZoneInfo(app.timezone));
@@ -131,7 +134,7 @@ async def postStart(run: Server, db: Session = Depends(get_db)) :
 		shutdown(db);
 
 @app.post("/api/v1/users", tags=['Entries'])
-async def reg_user(user: User, db: Session = Depends(get_db)) :
+async def reg_user(token: Annotated[str, Depends(get_current_user)], user: User, db: Session = Depends(get_db)) :
 	if (user.id == 0 and user.user == '') :
 		raise HTTPException(
 			status_code = 400,
@@ -147,7 +150,7 @@ async def reg_user(user: User, db: Session = Depends(get_db)) :
 	return user;
 
 @app.post("/api/v1/breaks", tags=['Breaks'])
-async def updateBreaks(recBreaks: NumBreaks, db: Session = Depends(get_db)) :
+async def updateBreaks(token: Annotated[str, Depends(get_current_user)], recBreaks: NumBreaks, db: Session = Depends(get_db)) :
 	app.breaks = recBreaks;
 	for item in app.db :
 		item.num = app.breaks.perPerson;
@@ -159,7 +162,7 @@ async def updateBreaks(recBreaks: NumBreaks, db: Session = Depends(get_db)) :
 
 # Updates
 @app.put("/api/v1/users", tags=['Entries'])
-async def up_user(update: User, db: Session = Depends(get_db)) :
+async def up_user(token: Annotated[str, Depends(get_current_user)], update: User, db: Session = Depends(get_db)) :
 	if (update.id != None and update.id != 0) :
 		for item in app.db :
 			if (item.id == update.id) :
@@ -196,7 +199,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
 # ! -------------------------------- Deletes --------------------------------
 @app.delete("/api/v1/users/clear", tags=['Delete'])
-async def clear(db: Session = Depends(get_db)) :
+async def clear(token: Annotated[str, Depends(get_current_user)], db: Session = Depends(get_db)) :
 	for item in app.db :
 		if (item.id != 0) :
 			delete_user(db, item);
@@ -212,7 +215,7 @@ async def clear(db: Session = Depends(get_db)) :
 	return ("cleared database")
 
 @app.delete("/api/v1/users/id/{id}", tags=['Delete'])
-async def rm_user(id: str, db: Session = Depends(get_db)) :
+async def rm_user(token: Annotated[str, Depends(get_current_user)], id: str, db: Session = Depends(get_db)) :
 	usr_id = int(id);
 	for item in app.db :
 		if (item.id == usr_id) :
@@ -224,7 +227,7 @@ async def rm_user(id: str, db: Session = Depends(get_db)) :
 	);
 
 @app.delete("/api/v1/users/user/{id}", tags=['Delete'])
-async def rm_user(id: str, db: Session = Depends(get_db)) :
+async def rm_user(token: Annotated[str, Depends(get_current_user)], id: str, db: Session = Depends(get_db)) :
 	for item in app.db :
 		if (item.user == id) :
 			delete_user(db, item, False);

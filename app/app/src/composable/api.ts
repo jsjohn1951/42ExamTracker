@@ -17,7 +17,7 @@ export class cookieClass {
 	getAuth ()
 	{
 		const data = this.cookie.cookies.get('Auth');
-		return (data);
+		return ((data as unknown) as token);
 	}
 
 	deleteAuth ()
@@ -65,27 +65,39 @@ export class apiAuth {
 		let data = this.cookie.getAuth();
 		if (data)
 		{
-			let res = await this.validate((data as unknown) as token);
+			let res = await this.validate(data);
 			if (res)
 				return true ;
 			this.cookie.deleteAuth();
 			return false ;
-			// res.then(() => {
-			// 	return true ;
-			// }).catch(() => {
-			// 	return false ;
-			// })
 		}
 		return (false);
 	}
 }
+
 export class apiUseFetch {
 	ws: Ref<wSocket>;
-	cookie = useCookies();
+	myCookie = new cookieClass();
+	cookie = this.myCookie.cookie;
 
 	constructor(ws: Ref<wSocket>)
 	{
 		this.ws = ws;
+	}
+
+	req (method: string, data: any | undefined)
+	{
+		let cookie = this.myCookie.getAuth();
+		let request = {
+			method: method,
+			headers: {
+				'Accept': 'application/json',
+				"Content-Type": "application/json",
+				'Authorization': `Bearer ${cookie.access_token}`
+			},
+			body: data
+		};
+		return (request)
 	}
 
 	async users ()
@@ -93,9 +105,7 @@ export class apiUseFetch {
 		let data: any
 
 		await fetch ('/api/v1/users',
-		{
-			method: 'GET',
-		}).then(async(res) => {
+		this.req('GET', undefined)).then(async(res) => {
 			await res.json().then((d) => {
 				data = d;
 		})
@@ -110,9 +120,7 @@ export class apiUseFetch {
 		let data: any
 
 		await fetch ('/api/current/time',
-		{
-			method: 'GET',
-		}).then(async(res) => {
+		this.req('GET', undefined)).then(async(res) => {
 			await res.json().then((d) => {
 				data = d;
 		})
@@ -127,9 +135,7 @@ export class apiUseFetch {
 		let data: any
 
 		await fetch ('/api/v1/start',
-		{
-			method: 'GET',
-		}).then(async(res) => {
+		this.req('GET', undefined)).then(async(res) => {
 			await res.json().then((d) => {
 				data = d;
 		})
@@ -144,9 +150,7 @@ export class apiUseFetch {
 		let data: any
 
 		await fetch ('/api/time/startTime',
-		{
-			method: 'GET',
-		}).then(async(res) => {
+		this.req('GET', undefined)).then(async(res) => {
 			await res.json().then((d) => {
 				data = d;
 		})
@@ -158,14 +162,10 @@ export class apiUseFetch {
 
 	async postBreaks (breaks: NumBreaks)
 	{
-		const request = {
-			method: "POST",
-    		headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({
-				perFacility: parseInt(breaks.perFacility),
-				perPerson: parseInt(breaks.perPerson)
-			})
-		};
+		const request = this.req('POST', JSON.stringify({
+			perFacility: parseInt(breaks.perFacility),
+			perPerson: parseInt(breaks.perPerson)
+		}));
 
 		const res = await fetch ('/api/v1/breaks',request).then(async res => {
 			const data = await res.json();
@@ -184,16 +184,12 @@ export class apiUseFetch {
 
 	async postUser (nPerson: person)
 	{
-		const request = {
-			method: "POST",
-    		headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({
-				id: parseInt(nPerson.id ? nPerson.id : '0'),
-				user: nPerson.username,
-				gender: nPerson.gender,
-				status: nPerson.status
-			})
-		};
+		const request = this.req('POST', JSON.stringify({
+			id: parseInt(nPerson.id ? nPerson.id : '0'),
+			user: nPerson.username,
+			gender: nPerson.gender,
+			status: nPerson.status
+		}));
 
 		const res = await fetch ('/api/v1/users',request).then(async res => {
 			const data = await res.json();
@@ -212,17 +208,13 @@ export class apiUseFetch {
 
 	async putUser (nPerson: person, num: Ref<number>)
 	{
-		const request = {
-			method: "PUT",
-    		headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({
-				id: parseInt(nPerson.id ? nPerson.id : '0'),
-				user: nPerson.username,
-				gender: nPerson.gender,
-				status: nPerson.status,
-				num: nPerson.num
-			})
-		};
+		const request = this.req('PUT', JSON.stringify({
+			id: parseInt(nPerson.id ? nPerson.id : '0'),
+			user: nPerson.username,
+			gender: nPerson.gender,
+			status: nPerson.status,
+			num: nPerson.num
+		}));
 
 		const res = await fetch ('/api/v1/users',request).then(async res => {
 			const data = await res.json();
@@ -241,13 +233,9 @@ export class apiUseFetch {
 
 	async putStart(start: boolean)
 	{
-		const request = {
-			method: "POST",
-    		headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({
-				examStart: (start ? "STARTED" : "NOT RUNNING")
-			})
-		};
+		const request = this.req('POST', JSON.stringify({
+			examStart: (start ? "STARTED" : "NOT RUNNING")
+		}));
 
 		const res = await fetch ('/api/v1/start',request).then(async res => {
 			const data = await res.json();
@@ -269,9 +257,7 @@ export class apiUseFetch {
 		let data: any;
 
 		await fetch (`/api/v1/users/id/${id}`,
-		{
-			method: 'DELETE',
-		}).then(async(res) => {
+		this.req('DELETE', undefined)).then(async(res) => {
 			await res.json().then((d) => {
 				data = d;
 			this.ws.value.send(`deleting user:${id}`)
@@ -286,9 +272,7 @@ export class apiUseFetch {
 		let data: any;
 
 		await fetch (`/api/v1/users/user/${id}`,
-		{
-			method: 'DELETE',
-		}).then(async(res) => {
+		this.req('DELETE', undefined)).then(async(res) => {
 			await res.json().then((d) => {
 				data = d;
 			this.ws.value.send(`deleting user:${id}`)
@@ -303,9 +287,7 @@ export class apiUseFetch {
 		let data: any;
 
 		await fetch (`/api/v1/users/clear`,
-		{
-			method: 'DELETE',
-		}).then(async(res) => {
+		this.req('DELETE', undefined)).then(async(res) => {
 			await res.json().then((d) => {
 				data = d;
 			this.ws.value.send(`deleting all`)
@@ -320,9 +302,7 @@ export class apiUseFetch {
 		let data: any;
 
 		await fetch (`/api/v1/users/away`,
-		{
-			method: 'GET',
-		}).then(async(res) => {
+		this.req('GET', undefined)).then(async(res) => {
 			await res.json().then((d) => {
 				data = d;
 		})
@@ -337,9 +317,7 @@ export class apiUseFetch {
 		let data: any;
 
 		await fetch (`/api/history`,
-		{
-			method: 'GET',
-		}).then(async(res) => {
+		this.req('GET', undefined)).then(async(res) => {
 			await res.blob().then((d) => {
 				data = d;
 		})
@@ -362,9 +340,7 @@ export class apiUseFetch {
 		let data: any;
 
 		await fetch (`/api/breaks`,
-		{
-			method: 'GET',
-		}).then(async(res) => {
+		this.req('GET', undefined)).then(async(res) => {
 			await res.json().then((d) => {
 				data = d;
 		})
@@ -379,9 +355,7 @@ export class apiUseFetch {
 		let data: any;
 
 		await fetch (`/api/history/${id}`,
-		{
-			method: 'GET',
-		}).then(async(res) => {
+		this.req('GET', undefined)).then(async(res) => {
 			await res.blob().then((d) => {
 				data = d;
 		})
@@ -401,15 +375,9 @@ export class apiUseFetch {
 
 	async postTimeZone(tmInfo: string)
 	{
-		const request = {
-			method: "POST",
-    		headers: { "Content-Type": "application/json" },
-			body: JSON.stringify(
-				{
-					tm: tmInfo
-				}
-			)
-		};
+		const request = this.req('POST', JSON.stringify({
+			tm: tmInfo
+		}));
 
 		const res = await fetch ('/api/timezone',request).then(async res => {
 			const data = await res.json();

@@ -1,5 +1,12 @@
 <script setup lang="ts">
-import Data from '@/components/Data.vue'
+import { onUnmounted } from 'vue';
+import { cookieClass } from './composable/api';
+
+let cookie = new cookieClass();
+
+onUnmounted(() => {
+	cookie.deleteAuth();
+})
 </script>
 
 <template>
