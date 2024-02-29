@@ -18,7 +18,7 @@ from sqlalchemy.orm import Session
 from utils import get_db, setAppUsers, \
 	setAppStarted, setAppBreaks, updateUser, \
 	setAppStartTm, setAppHistory, hash_pass, verify_password
-from OAuth import create_token
+from OAuth import create_token, get_current_user
 import os
 
 app = FastAPI();
@@ -39,6 +39,11 @@ def addHistory(user: User) :
 	app.History.append(entry);
 	add_History(SessionLocal(), entry);
 
+@app.post("/api/validate",  tags=['Authenticate'])
+def validation(token: Token, db: Session = Depends(get_db)):
+	get_current_user(token.access_token, db);
+	return (True);
+
 @app.post("/api/login", response_model=Token, tags=['Authenticate'])
 def login(userdetails: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)) :
 	user = get_admin();
@@ -49,28 +54,24 @@ def login(userdetails: OAuth2PasswordRequestForm = Depends(), db: Session = Depe
 	access_token = create_token({"user_id" : user.username});
 	return {"access_token" : access_token, "token_type" : "bearer"};
 
-@app.get("/api")
-def read_root():
-    return {"Hello": "World"}
-
-@app.get("/api/v1/users")
+@app.get("/api/v1/users", tags=['Entries'])
 async def fetch_users() :
 	return app.db;
 
-@app.get("/api/v1/start")
+@app.get("/api/v1/start", tags=['Runtime'])
 async def isStart() :
 	return app.runtime.examStart;
 
-@app.get("/api/v1/users/away")
+@app.get("/api/v1/users/away", tags=['Status Away'])
 async def allAway() :
 	listAll = [entry for entry in app.db if entry.status == Status.away];
 	return listAll;
 
-@app.get("/api/current/time")
+@app.get("/api/current/time", tags=['Time'])
 async def rtnTime() :
 	return str(datetime.now(tz=ZoneInfo(app.timezone)).timestamp())
 
-@app.get("/api/history")
+@app.get("/api/history", tags=['History'])
 async def rtnHistory() :
 	with open('Logfile.txt', mode='+w') as myfile :
 		x = datetime.now(tz=ZoneInfo(app.timezone));
@@ -88,7 +89,7 @@ async def rtnHistory() :
 		myfile.close();
 		return FileResponse('./Logfile.txt', media_type='application/octet-stream',filename='Logfile.txt')
 	
-@app.get("/api/history/{id}")
+@app.get("/api/history/{id}", tags=['History'])
 async def rtnIdHistory(id: str) :
 	listAll = [entry for entry in app.History if entry.id == int(id)]
 	with open('Logfile_'+id+'.txt', mode='+w') as myfile :
@@ -103,22 +104,22 @@ async def rtnIdHistory(id: str) :
 		myfile.close();
 		return FileResponse('Logfile_'+id+'.txt', media_type='application/octet-stream',filename='Logfile_'+id+'.txt')
 	
-@app.get("/api/time/startTime")
+@app.get("/api/time/startTime", tags=['Time'])
 async def rtnStartTime() :
 	return (app.startTime);
 
-@app.post("/api/timezone")
+@app.post("/api/timezone", tags=['Time'])
 async def rtnTZInfo(timezone: TMInfo) :
 	if (app.timezone == None) :
 		app.timezone = timezone.tm;
 	return (timezone);
 
-@app.get("/api/breaks")
+@app.get("/api/breaks", tags=['Breaks'])
 async def rtnBreaks() :
 	return app.breaks
 
 # ! -------------------------------- posts  -------------------------------- 
-@app.post("/api/v1/start")
+@app.post("/api/v1/start", tags=['Runtime'])
 async def postStart(run: Server, db: Session = Depends(get_db)) :
 	for item in app.db :
 		item.status = Status.seated;
@@ -129,7 +130,7 @@ async def postStart(run: Server, db: Session = Depends(get_db)) :
 	else :
 		shutdown(db);
 
-@app.post("/api/v1/users")
+@app.post("/api/v1/users", tags=['Entries'])
 async def reg_user(user: User, db: Session = Depends(get_db)) :
 	if (user.id == 0 and user.user == '') :
 		raise HTTPException(
@@ -145,7 +146,7 @@ async def reg_user(user: User, db: Session = Depends(get_db)) :
 	create_user(db=db, user=user);
 	return user;
 
-@app.post("/api/v1/breaks")
+@app.post("/api/v1/breaks", tags=['Breaks'])
 async def updateBreaks(recBreaks: NumBreaks, db: Session = Depends(get_db)) :
 	app.breaks = recBreaks;
 	for item in app.db :
@@ -157,7 +158,7 @@ async def updateBreaks(recBreaks: NumBreaks, db: Session = Depends(get_db)) :
 	return app.breaks;
 
 # Updates
-@app.put("/api/v1/users")
+@app.put("/api/v1/users", tags=['Entries'])
 async def up_user(update: User, db: Session = Depends(get_db)) :
 	if (update.id != None and update.id != 0) :
 		for item in app.db :
@@ -194,7 +195,7 @@ async def websocket_endpoint(websocket: WebSocket):
 		await manager.disconnect('all', websocket);
 
 # ! -------------------------------- Deletes --------------------------------
-@app.delete("/api/v1/users/clear")
+@app.delete("/api/v1/users/clear", tags=['Delete'])
 async def clear(db: Session = Depends(get_db)) :
 	for item in app.db :
 		if (item.id != 0) :
@@ -210,7 +211,7 @@ async def clear(db: Session = Depends(get_db)) :
 			os.remove('./' + item);
 	return ("cleared database")
 
-@app.delete("/api/v1/users/id/{id}")
+@app.delete("/api/v1/users/id/{id}", tags=['Delete'])
 async def rm_user(id: str, db: Session = Depends(get_db)) :
 	usr_id = int(id);
 	for item in app.db :
@@ -222,7 +223,7 @@ async def rm_user(id: str, db: Session = Depends(get_db)) :
 		detail=f"User '{id}' not found in Database!"
 	);
 
-@app.delete("/api/v1/users/user/{id}")
+@app.delete("/api/v1/users/user/{id}", tags=['Delete'])
 async def rm_user(id: str, db: Session = Depends(get_db)) :
 	for item in app.db :
 		if (item.user == id) :

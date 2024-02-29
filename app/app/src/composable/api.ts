@@ -2,10 +2,86 @@ import { person, api } from '../common/iPerson';
 import { Ref } from 'vue'
 import { wSocket } from './websocket';
 import { NumBreaks } from '@/common/iNumBreaks';
-import { Blob } from 'buffer';
+import { token } from '@/common/iToken';
+// import { Blob } from 'buffer';
+import { useCookies } from "vue3-cookies";
 
+export class cookieClass {
+	cookie = useCookies();
+
+	setAuth (data: string)
+	{
+		this.cookie.cookies.set('Auth', data);
+	}
+
+	getAuth ()
+	{
+		const data = this.cookie.cookies.get('Auth');
+		return (data);
+	}
+
+	deleteAuth ()
+	{
+		this.cookie.cookies.remove('Auth');
+	}
+}
+
+export class apiAuth {
+	cookie = new cookieClass();
+
+	async validate(token: token)
+	{
+		const request = {
+			method: "POST",
+    		headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify(
+				{
+					access_token: token.access_token,
+					token_type: token.token_type
+				}
+			)
+		};
+
+		const res = await fetch ('/api/validate',request).then(async res => {
+			const data = await res.json();
+
+			if (!res.ok)
+			{
+				console.log('error received');
+				return Promise.reject(((data && data.message) || res.status));
+			}
+			return (data);
+		}
+		).catch(error => {
+			console.error('There was an error!', error);
+    	});
+		return (res);
+	}
+
+	async auth()
+	{
+		let data = this.cookie.getAuth();
+		if (data)
+		{
+			let res = await this.validate((data as unknown) as token);
+			if (res)
+				return true ;
+			this.cookie.deleteAuth();
+			return false ;
+			// res.then(() => {
+			// 	return true ;
+			// }).catch(() => {
+			// 	return false ;
+			// })
+		}
+		return (false);
+	}
+}
 export class apiUseFetch {
 	ws: Ref<wSocket>;
+	cookie = useCookies();
 
 	constructor(ws: Ref<wSocket>)
 	{
@@ -348,5 +424,46 @@ export class apiUseFetch {
 		).catch(error => {
     	  console.error('There was an error!', error);
     	});
+	}
+
+	async authenticate(user: string, pw: string)
+	{
+		const info = {
+			'grant_type': '',
+			'username': user,
+			'password': pw,
+			'scope': '',
+			'client_id': '',
+			'client_secret': ''
+		}
+
+		let bod = new URLSearchParams();
+		bod.set('grant_type', '');
+		bod.set('username', user);
+		bod.set('password', pw);
+
+		console.log('body: ', bod.toString());
+		const request = {
+			method: "POST",
+    		headers: {
+				"Content-Type": "application/x-www-form-urlencoded"
+			},
+			body: bod.toString()
+		};
+
+		const res = await fetch ('/api/login',request).then(async res => {
+			const data = await res.json();
+
+			if (!res.ok)
+			{
+				console.log('error received');
+				return Promise.reject(((data && data.message) || res.status));
+			}
+			return (data);
+		}
+		).catch(error => {
+			console.error('There was an error!', error);
+    	});
+		return (res);
 	}
 }

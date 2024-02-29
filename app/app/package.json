@@ -10,14 +10,15 @@
     "@mdi/font": "7.0.96",
     "roboto-fontface": "*",
     "vue": "^3.2.0",
-    "vue-cookies": "^1.8.3",
     "vue-router": "^4.3.0",
+    "vue3-cookies": "^1.0.6",
     "vuetify": "^3.0.0"
   },
   "devDependencies": {
     "@babel/types": "^7.21.4",
     "@types/node": "^18.15.0",
     "@vitejs/plugin-vue": "^4.0.0",
+    "@vue/cli-plugin-router": "~5.0.0",
     "typescript": "^5.0.0",
     "unplugin-fonts": "^1.0.3",
     "vite": "^4.2.0",

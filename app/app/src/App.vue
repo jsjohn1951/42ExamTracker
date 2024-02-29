@@ -7,8 +7,13 @@ import Data from '@/components/Data.vue'
 	<v-app style="width: 100vw;">
 			<v-main style="width: 100vw;">
 					<div class="app-container flex-center" style="padding: 50px;">
+						<!-- <router-view /> -->
 						<Suspense>
-							<Data/>
+							<router-view v-slot="{Component}">
+								<transition name="slide" mode="out-in">
+									<component :is="Component" :key="$route.path"></component>
+								</transition>
+							</router-view>
 						</Suspense>
 					</div>
 			</v-main>
@@ -67,5 +72,22 @@ html::-webkit-scrollbar {
 	display: flex;
 	justify-content: end;
 	align-items: center;
+}
+
+/* transitions */
+.slide-enter-active,
+.slide-leave-active {
+	transition: opacity 1s, transform 1s;
+}
+
+.slide-enter-from
+{
+	opacity: 0;
+	transform: translateX(30%);
+}
+
+.slide-leave-to {
+	opacity: 0;
+	transform: translateX(-30%);
 }
 </style>

@@ -6,6 +6,7 @@ from models import dbUser, dbBreaks, dbStarted, dbHistory, dbAdmin
 from schemas import User, NumBreaks, ServStart, HistoryEntry, admin
 from database import SessionLocal
 from fastapi import Depends
+from schemas import Status
 
 def get_db():
     db = SessionLocal()
@@ -54,6 +55,7 @@ def start(db: Session, tm: str) :
 
 def shutdown(db: Session) :
     db_start = db.query(dbStarted).first();
+    db_users = get_users(db);
     if (db_start == None) :
         db_start = dbStarted(isstarted=False, timestarted='');
         db.add(db_start);
@@ -62,6 +64,9 @@ def shutdown(db: Session) :
     else :
         db_start.isstarted = False;
         db_start.timestarted = '';
+        db.commit();
+    for item in db_users :
+        item.status = Status.seated;
         db.commit();
     return db_start;
 
