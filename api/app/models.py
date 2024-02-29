@@ -7,14 +7,14 @@ from sqlalchemy.orm import relationship
 from database import Base
 
 class dbUser(Base) :
-	__tablename__ = "user"
+	__tablename__ = "dbuser"
 
 	id = Column(Integer, unique=True, primary_key=True)
-	user = Column(String, unique=True, index=True)
+	user_id = Column(String, unique=True, index=True)
 	gender = Column(String, index=True)
-	status = Column(String, index=True)
+	usr_status = Column(String, index=True)
 	num = Column(Integer, index=True)
-	time = Column(String, index=True)
+	time_stamp = Column(String, index=True)
 
 class dbBreaks(Base) :
 	__tablename__ = "breaks"
@@ -33,9 +33,9 @@ class dbHistory(Base) :
 	__tablename__ = "history"
 
 	id = Column(Integer, primary_key=True)
-	user = Column(String, index=True)
-	event = Column(String, index=True)
-	time = Column(String, index=True)
+	user_id = Column(String, index=True)
+	event_oc = Column(String, index=True)
+	time_stamp = Column(String, index=True)
 
 class dbAdmin(Base) :
 	__tablename__ = "admin"

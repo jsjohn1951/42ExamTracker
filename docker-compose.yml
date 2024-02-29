@@ -7,10 +7,13 @@ networks:
 services:
   db:
     container_name: core_db
-    image: postgres:16-alpine
-    restart: always
+    build:
+      context: ./db
+      dockerfile: db.Dockerfile
+    # restart: always
     volumes:
-      - ./db:/var/lib/postgresql/data
+      - ./db/db:/var/lib/postgresql/data
+      - ./db/scripts:/docker-entrypoint-initdb.d
     env_file:
       - .env/.env
     networks:
@@ -22,6 +25,7 @@ services:
         retries: 5
     ports:
       - 5432:5432
+    # entrypoint: ["sh", "-C", "/scripts/start.sh"]
 
   api:
     depends_on:

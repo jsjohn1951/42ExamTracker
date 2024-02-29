@@ -105,11 +105,11 @@ def update_breaks(db: Session, breaks: NumBreaks) :
 # ! --------------------- Users ---------------------
 def create_user(db: Session, user: User):
     db_user = dbUser(id=user.id,
-                            user=user.user,
+                            user_id=user.user,
                             gender=user.gender,
-                            status=user.status,
+                            usr_status=user.status,
                             num=user.num,
-                            time=user.time);
+                            time_stamp=user.time);
     db.add(db_user);
     db.commit();
     db.refresh(db_user);
@@ -119,7 +119,7 @@ def get_user_id(db: Session, user_id: int):
     return db.query(dbUser).filter(dbUser.id == user_id).first();
 
 def get_user_user(db: Session, username: str):
-    return db.query(dbUser).filter(dbUser.user == username).first();
+    return db.query(dbUser).filter(dbUser.user_id == username).first();
 
 def get_users(db: Session):
     return db.query(dbUser).all();
@@ -131,8 +131,8 @@ def update_user(db: Session, user: User, id: bool = True):
     else :
         db_user = get_user_user(db, user.user);
     db_user.num = user.num;
-    db_user.status = user.status;
-    db_user.time = user.time;
+    db_user.usr_status = user.status;
+    db_user.time_stamp = user.time;
     db.commit();
     return db_user;
 
@@ -148,9 +148,9 @@ def delete_user(db: Session, user: User, id: bool = True) :
 # ! --------------------- History ---------------------
 def add_History(db: Session, entry: HistoryEntry) :
     entry = dbHistory(id=entry.id,
-                      user=entry.user,
-                      event=entry.event,
-                      time=entry.time);
+                      user_id=entry.user,
+                      event_oc=entry.event,
+                      time_stamp=entry.time);
     db.add(entry);
     db.commit();
     db.refresh(entry);

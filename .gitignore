@@ -7,3 +7,4 @@ api/app/Logfile.txt
 */.txt
 */.env
 app/app/.env
+db/db/*
