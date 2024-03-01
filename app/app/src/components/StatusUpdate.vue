@@ -16,16 +16,25 @@ const num = ref(0);
 
 async function update(stat: status)
 {
-	const away = await api.getUsersAway();
-	const breaks = await api.getBreaks();
-	let gen = away.filter((element, index, array)=>{
-		return (element.gender == entry.value.gender)
-	})
-
-	if (stat == status.away && gen.length >= parseInt(breaks.perFacility))
+	try{
+		const away = await api.getUsersAway();
+		const breaks = await api.getBreaks();
+		let gen = away.filter((element, index, array)=>{
+			return (element.gender == entry.value.gender)
+		})
+		
+		if (stat == status.away && gen.length >= parseInt(breaks.perFacility))
+		{
+			alert('Too many people in facility')
+			return ;
+		}
+		entry.value.status = stat;
+		await api.putUser(entry.value, num);
+	} catch (err)
+	{
+		console.log(err);
 		return ;
-	entry.value.status = stat;
-	await api.putUser(entry.value, num);
+	}
 }
 
 async function download()

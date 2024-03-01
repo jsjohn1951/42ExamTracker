@@ -5,6 +5,7 @@ import { NumBreaks } from '@/common/iNumBreaks';
 import { token } from '@/common/iToken';
 // import { Blob } from 'buffer';
 import { useCookies } from "vue3-cookies";
+import router from '@/router';
 
 export class cookieClass {
 	cookie = useCookies();
@@ -45,18 +46,17 @@ export class apiAuth {
 		};
 
 		const res = await fetch ('/api/validate',request).then(async res => {
-			const data = await res.json();
-
-			if (!res.ok)
-			{
-				console.log('error received');
-				return Promise.reject(((data && data.message) || res.status));
-			}
-			return (data);
+			try {
+				const data = await res.json();
+				if (!res.ok)
+				{
+					console.log('error received');
+					return Promise.reject(((data && data.message) || res.status));
+				}
+				return (data);
+			} catch( e ) {}
 		}
-		).catch(error => {
-			console.error('There was an error!', error);
-    	});
+		).catch(error => {});
 		return (res);
 	}
 
@@ -65,10 +65,14 @@ export class apiAuth {
 		let data = this.cookie.getAuth();
 		if (data)
 		{
-			let res = await this.validate(data);
-			if (res)
-				return true ;
-			this.cookie.deleteAuth();
+			try {
+
+				let res = await this.validate(data);
+				if (res)
+					return true ;
+				this.cookie.deleteAuth();
+			} catch(e)
+			{console.log('error: ', e);}
 			return false ;
 		}
 		return (false);
@@ -79,13 +83,14 @@ export class apiUseFetch {
 	ws: Ref<wSocket>;
 	myCookie = new cookieClass();
 	cookie = this.myCookie.cookie;
+	auth = new apiAuth();
 
 	constructor(ws: Ref<wSocket>)
 	{
 		this.ws = ws;
 	}
 
-	req (method: string, data: any | undefined)
+	async req (method: string, data: any | undefined)
 	{
 		let cookie = this.myCookie.getAuth();
 		let request = {
@@ -104,8 +109,14 @@ export class apiUseFetch {
 	{
 		let data: any
 
+		if (!await this.auth.auth())
+		{
+			window.location.href = '/login';
+			return (data as api[]);
+		}
+
 		await fetch ('/api/v1/users',
-		this.req('GET', undefined)).then(async(res) => {
+		await this.req('GET', undefined)).then(async(res) => {
 			await res.json().then((d) => {
 				data = d;
 		})
@@ -119,8 +130,14 @@ export class apiUseFetch {
 	{
 		let data: any
 
+		if (!await this.auth.auth())
+		{
+			window.location.href = '/login';
+			return (data as number);
+		}
+
 		await fetch ('/api/current/time',
-		this.req('GET', undefined)).then(async(res) => {
+		await this.req('GET', undefined)).then(async(res) => {
 			await res.json().then((d) => {
 				data = d;
 		})
@@ -134,8 +151,14 @@ export class apiUseFetch {
 	{
 		let data: any
 
+		if (!await this.auth.auth())
+		{
+			window.location.href = '/login';
+			return (data as string);
+		}
+
 		await fetch ('/api/v1/start',
-		this.req('GET', undefined)).then(async(res) => {
+		await this.req('GET', undefined)).then(async(res) => {
 			await res.json().then((d) => {
 				data = d;
 		})
@@ -149,8 +172,14 @@ export class apiUseFetch {
 	{
 		let data: any
 
+		if (!await this.auth.auth())
+		{
+			window.location.href = '/login';
+			return (data as string);
+		}
+
 		await fetch ('/api/time/startTime',
-		this.req('GET', undefined)).then(async(res) => {
+		await this.req('GET', undefined)).then(async(res) => {
 			await res.json().then((d) => {
 				data = d;
 		})
@@ -162,7 +191,13 @@ export class apiUseFetch {
 
 	async postBreaks (breaks: NumBreaks)
 	{
-		const request = this.req('POST', JSON.stringify({
+		if (!await this.auth.auth())
+		{
+			window.location.href = '/login';
+			return ;
+		}
+
+		const request = await this.req('POST', JSON.stringify({
 			perFacility: parseInt(breaks.perFacility),
 			perPerson: parseInt(breaks.perPerson)
 		}));
@@ -184,7 +219,13 @@ export class apiUseFetch {
 
 	async postUser (nPerson: person)
 	{
-		const request = this.req('POST', JSON.stringify({
+		if (!await this.auth.auth())
+		{
+			window.location.href = '/login';
+			return ;
+		}
+	
+		const request = await this.req('POST', JSON.stringify({
 			id: parseInt(nPerson.id ? nPerson.id : '0'),
 			user: nPerson.username,
 			gender: nPerson.gender,
@@ -208,7 +249,13 @@ export class apiUseFetch {
 
 	async putUser (nPerson: person, num: Ref<number>)
 	{
-		const request = this.req('PUT', JSON.stringify({
+		if (!await this.auth.auth())
+		{
+			window.location.href = '/login';
+			throw new Error('Unautherized');
+		}
+
+		const request = await this.req('PUT', JSON.stringify({
 			id: parseInt(nPerson.id ? nPerson.id : '0'),
 			user: nPerson.username,
 			gender: nPerson.gender,
@@ -233,7 +280,13 @@ export class apiUseFetch {
 
 	async putStart(start: boolean)
 	{
-		const request = this.req('POST', JSON.stringify({
+		if (!await this.auth.auth())
+		{
+			window.location.href = '/login';
+			return ;
+		}
+	
+		const request = await this.req('POST', JSON.stringify({
 			examStart: (start ? "STARTED" : "NOT RUNNING")
 		}));
 
@@ -256,8 +309,14 @@ export class apiUseFetch {
 	{
 		let data: any;
 
+		if (!await this.auth.auth())
+		{
+			window.location.href = '/login';
+			return ;
+		}
+
 		await fetch (`/api/v1/users/id/${id}`,
-		this.req('DELETE', undefined)).then(async(res) => {
+		await this.req('DELETE', undefined)).then(async(res) => {
 			await res.json().then((d) => {
 				data = d;
 			this.ws.value.send(`deleting user:${id}`)
@@ -271,8 +330,14 @@ export class apiUseFetch {
 	{
 		let data: any;
 
+		if (!await this.auth.auth())
+		{
+			window.location.href = '/login';
+			return ;
+		}
+
 		await fetch (`/api/v1/users/user/${id}`,
-		this.req('DELETE', undefined)).then(async(res) => {
+		await this.req('DELETE', undefined)).then(async(res) => {
 			await res.json().then((d) => {
 				data = d;
 			this.ws.value.send(`deleting user:${id}`)
@@ -286,8 +351,14 @@ export class apiUseFetch {
 	{
 		let data: any;
 
+		if (!await this.auth.auth())
+		{
+			window.location.href = '/login';
+			return ;
+		}
+
 		await fetch (`/api/v1/users/clear`,
-		this.req('DELETE', undefined)).then(async(res) => {
+		await this.req('DELETE', undefined)).then(async(res) => {
 			await res.json().then((d) => {
 				data = d;
 			this.ws.value.send(`deleting all`)
@@ -301,8 +372,14 @@ export class apiUseFetch {
 	{
 		let data: any;
 
+		if (!await this.auth.auth())
+		{
+			window.location.href = '/login';
+			throw new Error('Unautherized');
+		}
+
 		await fetch (`/api/v1/users/away`,
-		this.req('GET', undefined)).then(async(res) => {
+		await this.req('GET', undefined)).then(async(res) => {
 			await res.json().then((d) => {
 				data = d;
 		})
@@ -316,8 +393,14 @@ export class apiUseFetch {
 	{
 		let data: any;
 
+		if (!await this.auth.auth())
+		{
+			window.location.href = '/login';
+			return (data as string);
+		}
+
 		await fetch (`/api/history`,
-		this.req('GET', undefined)).then(async(res) => {
+		await this.req('GET', undefined)).then(async(res) => {
 			await res.blob().then((d) => {
 				data = d;
 		})
@@ -339,8 +422,14 @@ export class apiUseFetch {
 	{
 		let data: any;
 
+		if (!await this.auth.auth())
+		{
+			window.location.href = '/login';
+			throw new Error('Unautherized');
+		}
+
 		await fetch (`/api/breaks`,
-		this.req('GET', undefined)).then(async(res) => {
+		await this.req('GET', undefined)).then(async(res) => {
 			await res.json().then((d) => {
 				data = d;
 		})
@@ -353,9 +442,15 @@ export class apiUseFetch {
 	async getIdHistory(id: string)
 	{
 		let data: any;
+		
+		if (!await this.auth.auth())
+		{
+			window.location.href = '/login';
+			return ('');
+		}
 
 		await fetch (`/api/history/${id}`,
-		this.req('GET', undefined)).then(async(res) => {
+		await this.req('GET', undefined)).then(async(res) => {
 			await res.blob().then((d) => {
 				data = d;
 		})
@@ -375,7 +470,13 @@ export class apiUseFetch {
 
 	async postTimeZone(tmInfo: string)
 	{
-		const request = this.req('POST', JSON.stringify({
+		if (!await this.auth.auth())
+		{
+			window.location.href = '/login';
+			return ;
+		}
+	
+		const request = await this.req('POST', JSON.stringify({
 			tm: tmInfo
 		}));
 
