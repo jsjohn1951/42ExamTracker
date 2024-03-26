@@ -1,6 +1,6 @@
 FROM postgres:16-alpine
 
-USER postgres
+# USER postgres
 
 RUN chmod 0700 /var/lib/postgresql/data
 
