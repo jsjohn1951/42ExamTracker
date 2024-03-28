@@ -7,4 +7,6 @@ api/app/Logfile.txt
 */.txt
 app/app/.env
 db/db/*
-.env/.env
+.env/.dev.env
+.env/.prod.env
+proxy/ssl/*

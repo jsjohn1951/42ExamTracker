@@ -22,13 +22,14 @@ async function update(stat: status)
 		let gen = away.filter((element, index, array)=>{
 			return (element.gender == entry.value.gender)
 		})
-		
+
 		if (stat == status.away && gen.length >= parseInt(breaks.perFacility))
 		{
 			alert('Too many people in facility')
 			return ;
 		}
 		entry.value.status = stat;
+		entry.value.id = '0';
 		await api.putUser(entry.value, num);
 	} catch (err)
 	{
@@ -67,7 +68,7 @@ async function download()
 				class="text-none"
 				text="Away" />
 			</v-col>
-			
+
 			<v-col>
 				<v-btn
 				@click="update(status.emergency)"
@@ -78,7 +79,7 @@ async function download()
 				class="text-none"
 				text="Emergency" />
 			</v-col>
-			
+
 			<v-col>
 				<v-btn
 				@click="update(status.seated)"

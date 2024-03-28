@@ -4,7 +4,7 @@
   "scripts": {
     "dev": "vite --host",
     "build": "vue-tsc --noEmit && vite build",
-    "preview": "vite preview --host --port 80"
+    "preview": "vite preview --host --port 5173"
   },
   "dependencies": {
     "@mdi/font": "7.0.96",

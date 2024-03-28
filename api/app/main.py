@@ -21,7 +21,6 @@ from utils import get_db, setAppUsers, \
 from OAuth import create_token, get_current_user, oauth2_schema
 import os
 from typing_extensions import Annotated
-# import fastapi.middleware.wsgi
 
 app = FastAPI();
 app.db = setAppUsers();
@@ -30,7 +29,6 @@ app.breaks = setAppBreaks();
 app.History = setAppHistory();
 app.timezone = None;
 app.startTime = setAppStartTm();
-# app.add_middleware()
 
 create_admin(username=os.getenv("ADMIN_USR"), password=hash_pass(os.getenv("ADMIN_PW")));
 
@@ -82,7 +80,7 @@ async def rtnHistory(token: Annotated[str, Depends(get_current_user)]) :
 		myfile.write('History Start:\t' + time + '\n\n');
 		for item in app.History :
 			line: str = '';
-			if item.id != None :
+			if item.id != None and item.id != 0 :
 				print('--- id: ', item.id, ' ----')
 				line += str(item.id);
 			else :
@@ -91,7 +89,7 @@ async def rtnHistory(token: Annotated[str, Depends(get_current_user)]) :
 			myfile.write(line + '\n');
 		myfile.close();
 		return FileResponse('./Logfile.txt', media_type='application/octet-stream',filename='Logfile.txt')
-	
+
 @app.get("/api/history/{id}", tags=['History'])
 async def rtnIdHistory(token: Annotated[str, Depends(get_current_user)], id: str) :
 	listAll = [entry for entry in app.History if entry.id == int(id)]
@@ -106,7 +104,7 @@ async def rtnIdHistory(token: Annotated[str, Depends(get_current_user)], id: str
 			myfile.write(line + '\n');
 		myfile.close();
 		return FileResponse('Logfile_'+id+'.txt', media_type='application/octet-stream',filename='Logfile_'+id+'.txt')
-	
+
 @app.get("/api/time/startTime", tags=['Time'])
 async def rtnStartTime(token: Annotated[str, Depends(get_current_user)]) :
 	return (app.startTime);
@@ -121,7 +119,7 @@ async def rtnTZInfo(token: Annotated[str, Depends(get_current_user)], timezone: 
 async def rtnBreaks(token: Annotated[str, Depends(get_current_user)]) :
 	return app.breaks
 
-# ! -------------------------------- posts  -------------------------------- 
+# ! -------------------------------- posts  --------------------------------
 @app.post("/api/v1/start", tags=['Runtime'])
 async def postStart(token: Annotated[str, Depends(get_current_user)], run: Server, db: Session = Depends(get_db)) :
 	for item in app.db :
@@ -164,6 +162,7 @@ async def updateBreaks(token: Annotated[str, Depends(get_current_user)], recBrea
 @app.put("/api/v1/users", tags=['Entries'])
 async def up_user(token: Annotated[str, Depends(get_current_user)], update: User, db: Session = Depends(get_db)) :
 	if (update.id != None and update.id != 0) :
+		print ("<DAMMIT HERE!>>>>>>>>>> Update id: ", update.id)
 		for item in app.db :
 			if (item.id == update.id) :
 				updateUser(item, update, ZoneInfo(app.timezone));

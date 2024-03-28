@@ -48,7 +48,7 @@ async function submit()
 <v-sheet @mouseover="expand = true" @mouseleave="expand = false, err = false" width="300" class="mx-auto flex-center flex-col">
     <v-form @submit.prevent style="width: 100%;">
 
-		<v-expand-transition>
+		<!-- <v-expand-transition>
 
 			<v-text-field
 			v-if="expand"
@@ -56,14 +56,14 @@ async function submit()
 			label="Id"
 			/>
 
-		</v-expand-transition>
+		</v-expand-transition> -->
 
 		<v-expand-transition>
 
 			<v-text-field
 			v-if="expand"
 			v-model="pUsername"
-			label="Intra Login"
+			label="Intra Login / Card ID"
 			/>
 		</v-expand-transition>
 

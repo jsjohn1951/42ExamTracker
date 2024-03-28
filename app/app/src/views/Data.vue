@@ -36,7 +36,7 @@ async function setUp ()
 	for (item of nRes)
 	{
 		let found = dPersons.value.find((obj) => {
-			return (item.id?.toString() == obj.id)
+			return (item.user === obj.username)
 		})
 		if (!found)
 			dPersons.value.push({
@@ -48,7 +48,7 @@ async function setUp ()
 				time: item.time ? item.time : undefined
 			})
 	}
-	started.value = await useFetch.started();
+	started.value = await useFetch.started() as boolean;
 }
 
 async function sync()

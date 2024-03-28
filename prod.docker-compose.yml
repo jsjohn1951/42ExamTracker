@@ -1,0 +1,78 @@
+version: '3.7'
+
+networks:
+  network:
+    driver: bridge
+
+services:
+  db:
+    container_name: core_db
+    build:
+      context: ./db
+      dockerfile: db.Dockerfile
+    volumes:
+      - ./db/db:/var/lib/postgresql/data
+      - ./db/scripts:/docker-entrypoint-initdb.d
+    env_file:
+      - .env/.prod.env
+    networks:
+      - network
+    healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB -h db"]
+        interval: 10s
+        timeout: 5s
+        retries: 5
+    ports:
+      - 5432:5432
+
+  api:
+    depends_on:
+      db:
+        condition: service_healthy
+    container_name: core_api
+    build:
+      context: ./api
+      dockerfile: api.Dockerfile
+    restart: on-failure
+    volumes:
+      - ./api/app:/app
+    env_file:
+      - .env/.prod.env
+    networks:
+      - network
+    entrypoint: ["sh", "-C", "/scripts/start.sh"]
+
+  app:
+    depends_on:
+      - api
+    container_name: core_app
+    build :
+      context: ./app
+      dockerfile: app.Dockerfile
+    restart: on-failure
+    volumes:
+      - ./app/app:/app
+      - ./.env/.prod.env:/app/.env
+    networks:
+      - network
+    entrypoint: ["sh", "-C", "/scripts/prod.start.sh"]
+
+  nginx:
+    depends_on:
+      - api
+      - app
+    container_name: proxy
+    build:
+      context: ./prod_proxy
+      dockerfile: proxy.Dockerfile
+    restart: on-failure
+    ports:
+      - 443:443
+      - 80:80
+      - 5111:5111
+    volumes:
+      - ./prod_proxy/conf:/etc/nginx/conf.d
+      - ./prod_proxy/ssl:/ssl
+    networks:
+      - network
+    entrypoint: ["nginx", "-g", "daemon off;"]

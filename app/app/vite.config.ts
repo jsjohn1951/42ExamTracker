@@ -41,5 +41,5 @@ export default defineConfig({
 	hmr: {
 		clientPort: 5111
 	}
-  },
+  }
 })

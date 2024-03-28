@@ -10,12 +10,11 @@ services:
     build:
       context: ./db
       dockerfile: db.Dockerfile
-    # restart: always
     volumes:
       - ./db/db:/var/lib/postgresql/data
       - ./db/scripts:/docker-entrypoint-initdb.d
     env_file:
-      - .env/.env
+      - .env/.dev.env
     networks:
       - network
     healthcheck:
@@ -38,7 +37,7 @@ services:
     volumes:
       - ./api/app:/app
     env_file:
-      - .env/.env
+      - .env/.dev.env
     networks:
       - network
     entrypoint: ["sh", "-C", "/scripts/start.sh"]
@@ -53,10 +52,10 @@ services:
     restart: on-failure
     volumes:
       - ./app/app:/app
-      - ./.env/.env:/app/.env
+      - ./.env/.dev.env:/app/.env
     networks:
       - network
-    entrypoint: ["sh", "-C", "/scripts/start.sh"]
+    entrypoint: ["sh", "-C", "/scripts/dev.start.sh"]
 
   nginx:
     depends_on:
@@ -64,14 +63,15 @@ services:
       - app
     container_name: proxy
     build:
-      context: ./proxy
+      context: ./dev_proxy
       dockerfile: proxy.Dockerfile
     restart: on-failure
     ports:
+      - 443:443
       - 80:80
       - 5111:5111
     volumes:
-      - ./proxy/conf:/etc/nginx/conf.d
+      - ./dev_proxy/conf:/etc/nginx/conf.d
     networks:
       - network
     entrypoint: ["nginx", "-g", "daemon off;"]

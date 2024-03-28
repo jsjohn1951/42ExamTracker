@@ -8,12 +8,12 @@ const router = useRouter();
 const toChange = ref(0);
 const username = ref('');
 const password = ref('');
-const usernameRules = ref([ value => {
+const usernameRules = ref([ () => {
 	if (username.value == '')
 		return 'Please enter valid username!'
 	return true
 }]);
-const passwordRules = ref([ value => {
+const passwordRules = ref([ () => {
 	if (password.value == '')
 		return 'Please enter valid password!'
 	return true

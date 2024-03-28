@@ -10,7 +10,7 @@ class dbUser(Base) :
 	__tablename__ = "dbuser"
 
 	id = Column(Integer, unique=True, primary_key=True)
-	user_id = Column(String, unique=True, index=True)
+	user_id = Column(String, unique=True, primary_key=True)
 	gender = Column(String, index=True)
 	usr_status = Column(String, index=True)
 	num = Column(Integer, index=True)
@@ -33,7 +33,7 @@ class dbHistory(Base) :
 	__tablename__ = "history"
 
 	id = Column(Integer, primary_key=True)
-	user_id = Column(String, index=True)
+	user_id = Column(String, primary_key=True)
 	event_oc = Column(String, index=True)
 	time_stamp = Column(String, index=True)
 
